@@ -27,16 +27,15 @@ public class ExceptionHandler {
 
 	private final ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
 
-	private final INoticeSendComponent sendComponent;
+	private INoticeSendComponent sendComponent;
 
 	private final Map<String, ExceptionStatistics> checkUid = Collections.synchronizedMap(new HashMap<>());
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	public ExceptionHandler(ExceptionNoticeProperty exceptionNoticeProperty, INoticeSendComponent sendComponent,
+	public ExceptionHandler(ExceptionNoticeProperty exceptionNoticeProperty,
 			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
 		this.exceptionNoticeProperty = exceptionNoticeProperty;
-		this.sendComponent = sendComponent;
 		this.exceptionNoticeFrequencyStrategy = exceptionNoticeFrequencyStrategy;
 	}
 
@@ -46,6 +45,20 @@ public class ExceptionHandler {
 	 */
 	public void setExceptionRedisStorageComponent(ExceptionRedisStorageComponent exceptionRedisStorageComponent) {
 		this.exceptionRedisStorageComponent = exceptionRedisStorageComponent;
+	}
+
+	/**
+	 * @return the sendComponent
+	 */
+	public INoticeSendComponent getSendComponent() {
+		return sendComponent;
+	}
+
+	/**
+	 * @param sendComponent the sendComponent to set
+	 */
+	public void setSendComponent(INoticeSendComponent sendComponent) {
+		this.sendComponent = sendComponent;
 	}
 
 	/**
