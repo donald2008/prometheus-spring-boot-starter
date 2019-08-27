@@ -19,6 +19,13 @@
 ![maven版本](https://img.shields.io/badge/maven-3.2.5%2B-red.svg?style=for-the-badge&logo=appveyor)
 ![spring boot](https://img.shields.io/badge/spring%20boot-2.0.0.RELEASE%2B-red.svg?style=for-the-badge&logo=appveyor)
 
+#### 2019-08-27更新
+
+1. 修改config的先后配置顺序，更加灵活的sendcomponent组件的配置
+
+2. 修复``exceptionnotice.open-notice=false``时（关闭异常通知）的配置错误
+
+3. 版本号变为**0.2.3-personal**
 
 
 #### 2019-07-31更新
@@ -69,7 +76,7 @@
 		<dependency>
 			<groupId>com.kuding</groupId>
 			<artifactId>prometheus-spring-boot-starter</artifactId>
-			<version>0.2.2-personal</version>
+			<version>0.2.3-personal</version>
 		</dependency>
 ```
 
