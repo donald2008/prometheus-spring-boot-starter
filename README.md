@@ -76,7 +76,7 @@
 		<dependency>
 			<groupId>com.kuding</groupId>
 			<artifactId>prometheus-spring-boot-starter</artifactId>
-			<version>0.2.2-personal</version>
+			<version>0.2.3-personal</version>
 		</dependency>
 ```
 
