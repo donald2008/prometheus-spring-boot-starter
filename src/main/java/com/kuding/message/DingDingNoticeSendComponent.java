@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.kuding.content.ExceptionNotice;
-import com.kuding.httpclient.SimpleHttpClient;
+import com.kuding.httpclient.DingdingHttpClient;
 import com.kuding.pojos.dingding.DingDingNotice;
 import com.kuding.pojos.dingding.DingDingResult;
 import com.kuding.properties.DingDingExceptionNoticeProperty;
@@ -15,26 +15,19 @@ import com.kuding.properties.ExceptionNoticeProperty;
 
 public class DingDingNoticeSendComponent implements INoticeSendComponent {
 
-	private SimpleHttpClient simpleHttpClient;
+	private final DingdingHttpClient httpClient;
 
-	private ExceptionNoticeProperty exceptionNoticeProperty;
+	private final ExceptionNoticeProperty exceptionNoticeProperty;
 
 	private Map<String, DingDingExceptionNoticeProperty> map;
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	public DingDingNoticeSendComponent(SimpleHttpClient simpleHttpClient,
-			ExceptionNoticeProperty exceptionNoticeProperty, Map<String, DingDingExceptionNoticeProperty> map) {
-		this.simpleHttpClient = simpleHttpClient;
+	public DingDingNoticeSendComponent(DingdingHttpClient httpClient, ExceptionNoticeProperty exceptionNoticeProperty,
+			Map<String, DingDingExceptionNoticeProperty> map) {
+		this.httpClient = httpClient;
 		this.exceptionNoticeProperty = exceptionNoticeProperty;
 		this.map = map;
-	}
-
-	/**
-	 * @return the simpleHttpClient
-	 */
-	public SimpleHttpClient getSimpleHttpClient() {
-		return simpleHttpClient;
 	}
 
 	/**
@@ -42,20 +35,6 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 	 */
 	public ExceptionNoticeProperty getExceptionNoticeProperty() {
 		return exceptionNoticeProperty;
-	}
-
-	/**
-	 * @param simpleHttpClient the simpleHttpClient to set
-	 */
-	public void setSimpleHttpClient(SimpleHttpClient simpleHttpClient) {
-		this.simpleHttpClient = simpleHttpClient;
-	}
-
-	/**
-	 * @param exceptionNoticeProperty the exceptionNoticeProperty to set
-	 */
-	public void setExceptionNoticeProperty(ExceptionNoticeProperty exceptionNoticeProperty) {
-		this.exceptionNoticeProperty = exceptionNoticeProperty;
 	}
 
 	/**
@@ -78,7 +57,7 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 		if (dingDingExceptionNoticeProperty != null) {
 			DingDingNotice dingDingNotice = new DingDingNotice(exceptionNotice.createText(),
 					dingDingExceptionNoticeProperty.getPhoneNum());
-			DingDingResult result = simpleHttpClient.post(dingDingExceptionNoticeProperty.getWebHook(), dingDingNotice,
+			DingDingResult result = httpClient.post(dingDingExceptionNoticeProperty.getWebHook(), dingDingNotice,
 					DingDingResult.class);
 			logger.debug(result);
 		} else

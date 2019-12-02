@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.kuding.properties.enums.ListenType;
+import com.kuding.properties.enums.ProjectEnviroment;
 
 @ConfigurationProperties(prefix = "exceptionnotice")
 public class ExceptionNoticeProperty {
@@ -28,6 +29,11 @@ public class ExceptionNoticeProperty {
 	 */
 	@Value("${spring.application.name:${exceptionnotice.project-name:无名工程}}")
 	private String projectName;
+
+	/**
+	 * 工程的发布环境，主要分为5个：开发环境、测试环境、预发环境、正式环境与回滚环境
+	 */
+	private ProjectEnviroment projectEnviroment;
 
 	/**
 	 * <p>
@@ -65,17 +71,25 @@ public class ExceptionNoticeProperty {
 	/**
 	 * 发送钉钉异常通知给谁
 	 */
-	Map<String, DingDingExceptionNoticeProperty> dingding;
+	private Map<String, DingDingExceptionNoticeProperty> dingding;
 
 	/**
 	 * 发送邮件异常通知给谁
 	 */
-	Map<String, EmailExceptionNoticeProperty> email;
+	private Map<String, EmailExceptionNoticeProperty> email;
 
 	/**
 	 * 默认通知人，当异常通知找不到背锅侠时，就用默认背锅侠
 	 */
 	private String defaultNotice;
+
+	public ProjectEnviroment getProjectEnviroment() {
+		return projectEnviroment;
+	}
+
+	public void setProjectEnviroment(ProjectEnviroment projectEnviroment) {
+		this.projectEnviroment = projectEnviroment;
+	}
 
 	/**
 	 * @return the openNotice

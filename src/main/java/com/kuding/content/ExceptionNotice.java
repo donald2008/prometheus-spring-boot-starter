@@ -101,7 +101,7 @@ public class ExceptionNotice {
 
 	public String createText() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("工程信息：").append(project).append("\r\n");
+		stringBuilder.append("## 工程信息：").append(project).append("\r\n");
 		stringBuilder.append("类路径：").append(classPath).append("\r\n");
 		stringBuilder.append("方法名：").append(methodName).append("\r\n");
 		if (parames != null && parames.size() > 0) {

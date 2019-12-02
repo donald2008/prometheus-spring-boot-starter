@@ -1,5 +1,6 @@
 package com.kuding.config;
 
+import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -8,14 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.client.RestTemplate;
 
-import com.google.gson.Gson;
 import com.kuding.aop.ExceptionNoticeAop;
 import com.kuding.exceptionhandle.ExceptionHandler;
-import com.kuding.httpclient.SimpleHttpClient;
+import com.kuding.httpclient.DefaultDingdingHttpClient;
+import com.kuding.httpclient.DingdingHttpClient;
 import com.kuding.message.DingDingNoticeSendComponent;
 import com.kuding.message.INoticeSendComponent;
 import com.kuding.properties.DingDingExceptionNoticeProperty;
@@ -39,7 +42,7 @@ public class ExceptionNoticeConfig {
 	private INoticeSendComponent noticeSendComponent;
 
 	@Autowired
-	private Gson gson;
+	private RestTemplateBuilder restTemplateBuilder;
 
 	@Bean
 	@ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "common", matchIfMissing = true)
@@ -51,14 +54,14 @@ public class ExceptionNoticeConfig {
 
 	@Bean
 	@ConditionalOnMissingBean({ ExceptionHandler.class })
-	public ExceptionHandler exceptionHandler() {
+	public ExceptionHandler exceptionHandler(DingdingHttpClient httpClient) {
 		Map<String, DingDingExceptionNoticeProperty> dingding = exceptionNoticeProperty.getDingding();
 		List<INoticeSendComponent> list = new LinkedList<INoticeSendComponent>();
 		if (noticeSendComponent != null)
 			list.add(noticeSendComponent);
 		if (dingding != null && dingding.size() > 0) {
-			DingDingNoticeSendComponent component = new DingDingNoticeSendComponent(simpleHttpClient(),
-					exceptionNoticeProperty, dingding);
+			DingDingNoticeSendComponent component = new DingDingNoticeSendComponent(httpClient, exceptionNoticeProperty,
+					dingding);
 			list.add(component);
 		}
 
@@ -67,10 +70,19 @@ public class ExceptionNoticeConfig {
 		return exceptionHandler;
 	}
 
+//	@Bean
+//	public SimpleHttpClient simpleHttpClient() {
+//		SimpleHttpClient httpClient = new SimpleHttpClient(gson);
+//		return httpClient;
+//	}
+
 	@Bean
-	public SimpleHttpClient simpleHttpClient() {
-		SimpleHttpClient httpClient = new SimpleHttpClient(gson);
-		return httpClient;
+	@ConditionalOnMissingBean({ DingdingHttpClient.class })
+	public DingdingHttpClient dingdingHttpClient() {
+		RestTemplate restTemplate = restTemplateBuilder.setConnectTimeout(Duration.ofSeconds(20)).build();
+		DingdingHttpClient dingdingHttpClient = new DefaultDingdingHttpClient(restTemplate);
+		return dingdingHttpClient;
+
 	}
 
 }
