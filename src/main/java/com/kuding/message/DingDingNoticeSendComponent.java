@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.kuding.content.ExceptionNotice;
 import com.kuding.httpclient.DingdingHttpClient;
+import com.kuding.pojos.dingding.DingDingAt;
 import com.kuding.pojos.dingding.DingDingNotice;
 import com.kuding.pojos.dingding.DingDingResult;
 import com.kuding.properties.DingDingExceptionNoticeProperty;
@@ -56,7 +57,7 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 		DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty = map.get(blamedFor);
 		if (dingDingExceptionNoticeProperty != null) {
 			DingDingNotice dingDingNotice = new DingDingNotice(exceptionNotice.createText(),
-					dingDingExceptionNoticeProperty.getPhoneNum());
+					new DingDingAt(dingDingExceptionNoticeProperty.getPhoneNum()));
 			DingDingResult result = httpClient.post(dingDingExceptionNoticeProperty.getWebHook(), dingDingNotice,
 					DingDingResult.class);
 			logger.debug(result);

@@ -2,6 +2,8 @@ package com.kuding.properties;
 
 import java.util.Arrays;
 
+import com.kuding.properties.enums.DingdingTextType;
+
 public class DingDingExceptionNoticeProperty {
 
 	/**
@@ -13,6 +15,11 @@ public class DingDingExceptionNoticeProperty {
 	 * 钉钉机器人web钩子
 	 */
 	private String webHook;
+
+	/**
+	 * 钉钉通知文本类型
+	 */
+	private DingdingTextType textType = DingdingTextType.TEXT;
 
 	/**
 	 * @return the phoneNum
@@ -42,14 +49,17 @@ public class DingDingExceptionNoticeProperty {
 		this.webHook = webHook;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "DingDingExceptionNoticeProperty [phoneNum=" + Arrays.toString(phoneNum) + ", webHook=" + webHook + "]";
+	public DingdingTextType getTextType() {
+		return textType;
 	}
 
+	public void setTextType(DingdingTextType textType) {
+		this.textType = textType;
+	}
+
+	@Override
+	public String toString() {
+		return "DingDingExceptionNoticeProperty [phoneNum=" + Arrays.toString(phoneNum) + ", webHook=" + webHook
+				+ ", textType=" + textType + "]";
+	}
 }

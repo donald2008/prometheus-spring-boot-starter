@@ -1,26 +1,36 @@
 package com.kuding.pojos.dingding;
 
+import com.kuding.properties.enums.DingdingTextType;
+
 public class DingDingNotice {
 
 	private DingDingText text;
+	private DingDingMarkdown markdown;
 	private DingDingAt at;
 	private String msgtype = "text";
-
-	public DingDingNotice(DingDingText text, DingDingAt at, String msgtype) {
-		super();
-		this.text = text;
-		this.at = at;
-		this.msgtype = msgtype;
-	}
 
 	public DingDingNotice(DingDingText text, DingDingAt at) {
 		this.text = text;
 		this.at = at;
+		this.msgtype = DingdingTextType.TEXT.getMsgType();
 	}
 
-	public DingDingNotice(String text, String... at) {
+	public DingDingNotice(DingDingMarkdown markdown, DingDingAt at) {
+		this.markdown = markdown;
+		this.at = at;
+		this.msgtype = DingdingTextType.MARKDOWN.getMsgType();
+	}
+
+	public DingDingNotice(String title, String text, DingDingAt at) {
+		this.markdown = new DingDingMarkdown(title, text);
+		this.msgtype = DingdingTextType.MARKDOWN.getMsgType();
+		this.at = at;
+	}
+
+	public DingDingNotice(String text, DingDingAt at) {
 		this.text = new DingDingText(text);
-		this.at = new DingDingAt(at);
+		this.msgtype = DingdingTextType.TEXT.getMsgType();
+		this.at = at;
 	}
 
 	/**
@@ -63,6 +73,14 @@ public class DingDingNotice {
 	 */
 	public void setMsgtype(String msgtype) {
 		this.msgtype = msgtype;
+	}
+
+	public DingDingMarkdown getMarkdown() {
+		return markdown;
+	}
+
+	public void setMarkdown(DingDingMarkdown markdown) {
+		this.markdown = markdown;
 	}
 
 }
