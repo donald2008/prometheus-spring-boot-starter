@@ -19,11 +19,17 @@ import com.kuding.aop.ExceptionNoticeAop;
 import com.kuding.exceptionhandle.ExceptionHandler;
 import com.kuding.httpclient.DefaultDingdingHttpClient;
 import com.kuding.httpclient.DingdingHttpClient;
+import com.kuding.markdown.DefaultMarkdownHttpMessageResolver;
+import com.kuding.markdown.DefaultMarkdownMessageResolver;
 import com.kuding.message.DingDingNoticeSendComponent;
 import com.kuding.message.INoticeSendComponent;
 import com.kuding.properties.DingDingExceptionNoticeProperty;
 import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
 import com.kuding.properties.ExceptionNoticeProperty;
+import com.kuding.properties.enums.DingdingTextType;
+import com.kuding.properties.enums.ListenType;
+import com.kuding.text.ExceptionNoticeResolver;
+import com.kuding.text.ExceptionNoticeResolverFactory;
 
 @Configuration
 @EnableConfigurationProperties({ ExceptionNoticeProperty.class, ExceptionNoticeFrequencyStrategy.class })
@@ -53,28 +59,37 @@ public class ExceptionNoticeConfig {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
+	public ExceptionNoticeResolverFactory exceptionNoticeResolverFactory() {
+		ExceptionNoticeResolverFactory exceptionNoticeResolverFactory = new ExceptionNoticeResolverFactory();
+		if (exceptionNoticeProperty.getDingdingTextType() == DingdingTextType.MARKDOWN) {
+			ExceptionNoticeResolver exceptionNoticeResolver = null;
+			if (exceptionNoticeProperty.getListenType() == ListenType.COMMON)
+				exceptionNoticeResolver = new DefaultMarkdownMessageResolver(exceptionNoticeProperty);
+			if (exceptionNoticeProperty.getListenType() == ListenType.WEB_MVC)
+				exceptionNoticeResolver = new DefaultMarkdownHttpMessageResolver(exceptionNoticeProperty);
+			exceptionNoticeResolverFactory.addNoticeResolver("dingding", exceptionNoticeResolver);
+		}
+		return exceptionNoticeResolverFactory;
+	}
+
+	@Bean
 	@ConditionalOnMissingBean({ ExceptionHandler.class })
-	public ExceptionHandler exceptionHandler(DingdingHttpClient httpClient) {
+	public ExceptionHandler exceptionHandler(DingdingHttpClient httpClient,
+			ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
 		Map<String, DingDingExceptionNoticeProperty> dingding = exceptionNoticeProperty.getDingding();
 		List<INoticeSendComponent> list = new LinkedList<INoticeSendComponent>();
 		if (noticeSendComponent != null)
 			list.add(noticeSendComponent);
 		if (dingding != null && dingding.size() > 0) {
 			DingDingNoticeSendComponent component = new DingDingNoticeSendComponent(httpClient, exceptionNoticeProperty,
-					dingding);
+					dingding, exceptionNoticeResolverFactory);
 			list.add(component);
 		}
-
 		ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty, list,
 				exceptionNoticeFrequencyStrategy);
 		return exceptionHandler;
 	}
-
-//	@Bean
-//	public SimpleHttpClient simpleHttpClient() {
-//		SimpleHttpClient httpClient = new SimpleHttpClient(gson);
-//		return httpClient;
-//	}
 
 	@Bean
 	@ConditionalOnMissingBean({ DingdingHttpClient.class })

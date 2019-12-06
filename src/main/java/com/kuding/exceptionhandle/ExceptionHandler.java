@@ -15,7 +15,6 @@ import org.springframework.util.StringUtils;
 
 import com.kuding.content.ExceptionNotice;
 import com.kuding.content.HttpExceptionNotice;
-import com.kuding.content.MultiTenantExceptionNotice;
 import com.kuding.message.INoticeSendComponent;
 import com.kuding.pojos.ExceptionStatistics;
 import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
@@ -136,31 +135,6 @@ public class ExceptionHandler {
 		return exceptionNotice;
 	}
 
-	/**
-	 * 多租户中处理背锅信息
-	 * 
-	 * @param blamedFor
-	 * @param exception
-	 * @param url
-	 * @param param
-	 * @param requestBody
-	 * @param headers
-	 * @param tenantId
-	 * @return
-	 */
-	public MultiTenantExceptionNotice createHttpNotice(String blamedFor, RuntimeException exception, String url,
-			Map<String, String> param, String requestBody, Map<String, String> headers, String tenantId) {
-		blamedFor = checkBlameFor(blamedFor);
-		if (containsException(exception))
-			return null;
-		MultiTenantExceptionNotice exceptionNotice = new MultiTenantExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), url, param, requestBody, headers, tenantId);
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			messageSend(blamedFor, exceptionNotice);
-		return exceptionNotice;
-	}
 
 	private boolean persist(ExceptionNotice exceptionNotice) {
 		Boolean needNotice = false;

@@ -8,6 +8,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import com.kuding.properties.enums.DingdingTextType;
+import com.kuding.properties.enums.EmailTextType;
 import com.kuding.properties.enums.ListenType;
 import com.kuding.properties.enums.ProjectEnviroment;
 
@@ -82,6 +84,16 @@ public class ExceptionNoticeProperty {
 	 * 默认通知人，当异常通知找不到背锅侠时，就用默认背锅侠
 	 */
 	private String defaultNotice;
+
+	/**
+	 * 钉钉通知文本类型
+	 */
+	private DingdingTextType dingdingTextType = DingdingTextType.TEXT;
+
+	/**
+	 * 邮件的通知文本类型
+	 */
+	private EmailTextType emailTextType = EmailTextType.TEXT;
 
 	public ProjectEnviroment getProjectEnviroment() {
 		return projectEnviroment;
@@ -239,13 +251,32 @@ public class ExceptionNoticeProperty {
 		this.defaultNotice = defaultNotice;
 	}
 
-	@Override
-	public String toString() {
-		return "ExceptionNoticeProperty [openNotice=" + openNotice + ", includedTracePackage=" + includedTracePackage
-				+ ", projectName=" + projectName + ", listenType=" + listenType + ", enableRedisStorage="
-				+ enableRedisStorage + ", redisKey=" + redisKey + ", excludeExceptions=" + excludeExceptions
-				+ ", includeHeaderName=" + includeHeaderName + ", dingding=" + dingding + ", email=" + email
-				+ ", defaultNotice=" + defaultNotice + "]";
+	/**
+	 * @return the dingdingTextType
+	 */
+	public DingdingTextType getDingdingTextType() {
+		return dingdingTextType;
+	}
+
+	/**
+	 * @param dingdingTextType the dingdingTextType to set
+	 */
+	public void setDingdingTextType(DingdingTextType dingdingTextType) {
+		this.dingdingTextType = dingdingTextType;
+	}
+
+	/**
+	 * @return the emailTextType
+	 */
+	public EmailTextType getEmailTextType() {
+		return emailTextType;
+	}
+
+	/**
+	 * @param emailTextType the emailTextType to set
+	 */
+	public void setEmailTextType(EmailTextType emailTextType) {
+		this.emailTextType = emailTextType;
 	}
 
 }

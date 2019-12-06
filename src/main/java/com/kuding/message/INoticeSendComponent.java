@@ -9,4 +9,5 @@ public interface INoticeSendComponent {
 	public void send(String blamedFor, ExceptionNotice exceptionNotice);
 
 	public Collection<String> getAllBuddies();
+
 }

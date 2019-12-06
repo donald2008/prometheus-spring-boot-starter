@@ -1,6 +1,7 @@
 package com.kuding.markdown;
 
 import java.util.List;
+import java.util.Map;
 
 public class SimpleMarkdownBuilder {
 
@@ -32,9 +33,11 @@ public class SimpleMarkdownBuilder {
 		return this;
 	}
 
-	public SimpleMarkdownBuilder point(List<String> contentList) {
-		contentList.forEach(x -> stringBuilder.append("- ").append(x).append("\n"));
-		stringBuilder.append("\n");
+	public SimpleMarkdownBuilder point(List<?> contentList) {
+		if (contentList != null && contentList.size() > 0) {
+			contentList.forEach(x -> stringBuilder.append("- ").append(x).append("\n"));
+			stringBuilder.append("\n");
+		}
 		return this;
 	}
 
@@ -58,6 +61,17 @@ public class SimpleMarkdownBuilder {
 
 	public SimpleMarkdownBuilder linked(String explain, String url) {
 		stringBuilder.append("![").append(explain).append("](").append(url).append(")");
+		return this;
+	}
+
+	public SimpleMarkdownBuilder keyValue(Map<?, ?> map, String keyName, String valueName, TableAlignment alignment) {
+		if (map != null && map.size() > 0) {
+			stringBuilder.append("|").append(keyName).append("|").append(valueName).append("|").append("\n");
+			String value = alignment.getValue();
+			stringBuilder.append(value).append("|").append(value).append("|").append("\n");
+			map.forEach((x, y) -> stringBuilder.append("|").append(x).append("|").append(y).append("|").append("\n"));
+			stringBuilder.append("\n\n");
+		}
 		return this;
 	}
 

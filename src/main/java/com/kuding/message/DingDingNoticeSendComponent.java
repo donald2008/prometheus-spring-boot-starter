@@ -13,6 +13,8 @@ import com.kuding.pojos.dingding.DingDingNotice;
 import com.kuding.pojos.dingding.DingDingResult;
 import com.kuding.properties.DingDingExceptionNoticeProperty;
 import com.kuding.properties.ExceptionNoticeProperty;
+import com.kuding.properties.enums.DingdingTextType;
+import com.kuding.text.ExceptionNoticeResolverFactory;
 
 public class DingDingNoticeSendComponent implements INoticeSendComponent {
 
@@ -22,13 +24,17 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 
 	private Map<String, DingDingExceptionNoticeProperty> map;
 
+	private final ExceptionNoticeResolverFactory exceptionNoticeResolverFactory;
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	public DingDingNoticeSendComponent(DingdingHttpClient httpClient, ExceptionNoticeProperty exceptionNoticeProperty,
-			Map<String, DingDingExceptionNoticeProperty> map) {
+			Map<String, DingDingExceptionNoticeProperty> map,
+			ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
 		this.httpClient = httpClient;
 		this.exceptionNoticeProperty = exceptionNoticeProperty;
 		this.map = map;
+		this.exceptionNoticeResolverFactory = exceptionNoticeResolverFactory;
 	}
 
 	/**
@@ -56,8 +62,10 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 	public void send(String blamedFor, ExceptionNotice exceptionNotice) {
 		DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty = map.get(blamedFor);
 		if (dingDingExceptionNoticeProperty != null) {
-			DingDingNotice dingDingNotice = new DingDingNotice(exceptionNotice.createText(),
-					new DingDingAt(dingDingExceptionNoticeProperty.getPhoneNum()));
+			String notice = exceptionNoticeResolverFactory.resolve("dingding", exceptionNotice);
+			DingDingNotice dingDingNotice = exceptionNoticeProperty.getDingdingTextType() == DingdingTextType.TEXT
+					? new DingDingNotice(notice, new DingDingAt(dingDingExceptionNoticeProperty.getPhoneNum()))
+					: new DingDingNotice("异常通知", notice, new DingDingAt(dingDingExceptionNoticeProperty.getPhoneNum()));
 			DingDingResult result = httpClient.post(dingDingExceptionNoticeProperty.getWebHook(), dingDingNotice,
 					DingDingResult.class);
 			logger.debug(result);
