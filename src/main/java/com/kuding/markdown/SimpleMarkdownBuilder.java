@@ -21,11 +21,6 @@ public class SimpleMarkdownBuilder {
 		return this;
 	}
 
-	public SimpleMarkdownBuilder bold(String content) {
-		stringBuilder.append(String.format("**%s**", content));
-		return this;
-	}
-
 	public SimpleMarkdownBuilder text(String content, boolean lineFeed) {
 		stringBuilder.append(content);
 		if (lineFeed)
@@ -41,7 +36,7 @@ public class SimpleMarkdownBuilder {
 		return this;
 	}
 
-	public SimpleMarkdownBuilder orderPoint(List<String> list) {
+	public SimpleMarkdownBuilder orderPoint(List<?> list) {
 		for (int i = 0; i < list.size(); i++)
 			stringBuilder.append(i + 1).append(". ").append(list.get(i)).append("\n");
 		stringBuilder.append("\n");
@@ -82,5 +77,9 @@ public class SimpleMarkdownBuilder {
 
 	public String build() {
 		return stringBuilder.toString();
+	}
+
+	public static String bold(String text) {
+		return String.format("**%s**", text);
 	}
 }
