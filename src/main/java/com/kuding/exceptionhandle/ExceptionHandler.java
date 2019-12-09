@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -78,13 +79,24 @@ public class ExceptionHandler {
 	}
 
 	private boolean containsException(RuntimeException exception) {
-		Class<? extends RuntimeException> thisEClass = exception.getClass();
+		List<Class<? extends Throwable>> thisEClass = getAllExceptionClazz(exception);
 		List<Class<? extends RuntimeException>> list = exceptionNoticeProperty.getExcludeExceptions();
 		for (Class<? extends RuntimeException> clazz : list) {
-			if (clazz.isAssignableFrom(thisEClass))
+			if (thisEClass.stream().anyMatch(c -> clazz.isAssignableFrom(c)))
 				return true;
 		}
 		return false;
+	}
+
+	private List<Class<? extends Throwable>> getAllExceptionClazz(RuntimeException exception) {
+		List<Class<? extends Throwable>> list = new LinkedList<Class<? extends Throwable>>();
+		list.add(exception.getClass());
+		Throwable cause = exception.getCause();
+		while (cause != null) {
+			list.add(cause.getClass());
+			cause = cause.getCause();
+		}
+		return list;
 	}
 
 	/**
@@ -134,7 +146,6 @@ public class ExceptionHandler {
 			messageSend(blamedFor, exceptionNotice);
 		return exceptionNotice;
 	}
-
 
 	private boolean persist(ExceptionNotice exceptionNotice) {
 		Boolean needNotice = false;

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.util.DigestUtils;
@@ -40,7 +41,7 @@ public class ExceptionNotice {
 	/**
 	 * 异常信息
 	 */
-	protected String exceptionMessage;
+	protected List<String> exceptionMessage;
 
 	/**
 	 * 异常追踪信息
@@ -60,9 +61,7 @@ public class ExceptionNotice {
 	public ExceptionNotice(Throwable ex, String filterTrace, Object[] args) {
 		this.exceptionMessage = gainExceptionMessage(ex);
 		this.parames = args == null ? null : Arrays.stream(args).collect(toList());
-		List<StackTraceElement> list = Arrays.stream(ex.getStackTrace())
-				.filter(x -> filterTrace == null ? true : x.getClassName().startsWith(filterTrace))
-				.filter(x -> !x.getFileName().equals("<generated>")).collect(toList());
+		List<StackTraceElement> list = stackTrace(ex, filterTrace);
 		if (list.size() > 0) {
 			this.traceInfo = list.stream().map(x -> x.toString()).collect(toList());
 			this.methodName = list.get(0).getMethodName();
@@ -75,9 +74,7 @@ public class ExceptionNotice {
 		this.exceptionMessage = gainExceptionMessage(ex);
 		this.showCount = showCount;
 		this.parames = args == null ? null : Arrays.stream(args).collect(toList());
-		List<StackTraceElement> list = Arrays.stream(ex.getStackTrace())
-				.filter(x -> filterTrace == null ? true : x.getClassName().startsWith(filterTrace))
-				.filter(x -> !x.getFileName().equals("<generated>")).collect(toList());
+		List<StackTraceElement> list = stackTrace(ex, filterTrace);
 		if (list.size() > 0) {
 			this.traceInfo = list.stream().map(x -> x.toString()).collect(toList());
 			this.methodName = list.get(0).getMethodName();
@@ -86,11 +83,35 @@ public class ExceptionNotice {
 		this.uid = calUid();
 	}
 
-	private String gainExceptionMessage(Throwable exception) {
-		String em = exception.toString();
-		if (exception.getCause() != null)
-			em = String.format("%s\r\n\tcaused by : %s", em, gainExceptionMessage(exception.getCause()));
-		return em;
+	private List<StackTraceElement> stackTrace(Throwable throwable, String filterTrace) {
+		List<StackTraceElement> list = new LinkedList<StackTraceElement>();
+		addStackTrace(list, throwable, filterTrace);
+		Throwable cause = throwable.getCause();
+		while (cause != null) {
+			addStackTrace(list, cause, filterTrace);
+			cause = cause.getCause();
+		}
+		return list;
+	}
+
+	public void addStackTrace(List<StackTraceElement> list, Throwable throwable, String filterTrace) {
+		list.addAll(0,
+				Arrays.stream(throwable.getStackTrace())
+						.filter(x -> filterTrace == null ? true : x.getClassName().startsWith(filterTrace))
+						.filter(x -> !x.getFileName().equals("<generated>")).collect(toList()));
+	}
+
+	private List<String> gainExceptionMessage(Throwable exception) {
+		List<String> list = new LinkedList<String>();
+		gainExceptionMessage(exception, list);
+		return list;
+	}
+
+	private void gainExceptionMessage(Throwable throwable, List<String> list) {
+		list.add(String.format("%s:%s", throwable.getClass().getName(), throwable.getMessage()));
+		Throwable cause = throwable.getCause();
+		if (cause != null)
+			gainExceptionMessage(cause, list);
 	}
 
 	private String calUid() {
@@ -108,7 +129,7 @@ public class ExceptionNotice {
 			stringBuilder.append("参数信息：")
 					.append(String.join(",", parames.stream().map(x -> x.toString()).collect(toList()))).append("\r\n");
 		}
-		stringBuilder.append("异常信息：").append(exceptionMessage).append("\r\n");
+		stringBuilder.append("异常信息：").append(String.join("\r\n caused by: ", exceptionMessage)).append("\r\n");
 		stringBuilder.append("异常追踪：").append("\r\n").append(String.join("\r\n", traceInfo)).append("\r\n");
 		stringBuilder.append("最后一次出现时间：")
 				.append(latestShowTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\r\n");
@@ -176,14 +197,14 @@ public class ExceptionNotice {
 	/**
 	 * @return the exceptionMessage
 	 */
-	public String getExceptionMessage() {
+	public List<String> getExceptionMessage() {
 		return exceptionMessage;
 	}
 
 	/**
 	 * @param exceptionMessage the exceptionMessage to set
 	 */
-	public void setExceptionMessage(String exceptionMessage) {
+	public void setExceptionMessage(List<String> exceptionMessage) {
 		this.exceptionMessage = exceptionMessage;
 	}
 

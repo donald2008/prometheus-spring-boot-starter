@@ -39,7 +39,7 @@ public class DefaultMarkdownHttpMessageResolver implements ExceptionNoticeResolv
 				.text(httpExceptionNotice.getClassPath(), true)
 				.title("方法名：" + SimpleMarkdownBuilder.bold(httpExceptionNotice.getMethodName()), 2).title("参数信息：", 2)
 				.point(httpExceptionNotice.getParames()).title("异常信息：", 2)
-				.text(httpExceptionNotice.getExceptionMessage(), true).title("异常追踪：", 2)
+				.point(httpExceptionNotice.getExceptionMessage()).title("异常追踪：", 2)
 				.point(httpExceptionNotice.getTraceInfo()).title("最后一次出现时间：", 2)
 				.text(httpExceptionNotice.getLatestShowTime()
 						.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), true)

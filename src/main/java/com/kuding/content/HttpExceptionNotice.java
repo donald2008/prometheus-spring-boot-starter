@@ -15,7 +15,6 @@ public class HttpExceptionNotice extends ExceptionNotice {
 
 	protected Map<String, String> headers;
 
-	
 	public HttpExceptionNotice(RuntimeException exception, String filter, String url, Map<String, String> param,
 			String requestBody, Map<String, String> headers) {
 		super(exception, filter, null);
@@ -25,7 +24,7 @@ public class HttpExceptionNotice extends ExceptionNotice {
 		this.headers = headers;
 
 	}
-	
+
 	/**
 	 * @return the url
 	 */
@@ -114,7 +113,7 @@ public class HttpExceptionNotice extends ExceptionNotice {
 					.append(String.join("\t,\t", parames.stream().map(x -> x.toString()).collect(toList())))
 					.append("\r\n");
 		}
-		stringBuilder.append("异常信息：").append(exceptionMessage).append("\r\n");
+		stringBuilder.append("异常信息：").append(String.join("\r\n caused by: ", exceptionMessage)).append("\r\n");
 		stringBuilder.append("异常追踪：").append("\r\n").append(String.join("\r\n", traceInfo)).append("\r\n");
 		stringBuilder.append("最后一次出现时间：")
 				.append(latestShowTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\r\n");
