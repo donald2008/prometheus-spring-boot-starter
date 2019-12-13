@@ -1,8 +1,16 @@
 package com.kuding.message;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -76,6 +84,27 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 	@Override
 	public Collection<String> getAllBuddies() {
 		return map.keySet();
+	}
+
+	protected URI generateUrl(DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty) {
+
+	}
+
+	protected String generateSign(Long timestamp, DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty) {
+		if (dingDingExceptionNoticeProperty.isEnableSignatureCheck()
+				&& dingDingExceptionNoticeProperty.getSignSecret() != null) {
+			String sec = dingDingExceptionNoticeProperty.getSignSecret();
+			String combine = String.format("%d\n%s", timestamp, sec);
+			try {
+				Mac mac = Mac.getInstance("HmacSHA256");
+				mac.init(new SecretKeySpec(sec.getBytes("UTF-8"), "HmacSHA256"));
+				byte[] signData = mac.doFinal(combine.getBytes("UTF-8"));
+				return URLEncoder.encode(Base64.encodeBase64String(signData), "UTF-8");
+			} catch (NoSuchAlgorithmException | UnsupportedEncodingException | InvalidKeyException e) {
+				e.printStackTrace();
+			}
+		}
+		return "";
 	}
 
 }

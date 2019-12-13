@@ -15,6 +15,16 @@ public class DingDingExceptionNoticeProperty {
 	private String webHook;
 
 	/**
+	 * 是否开启验签
+	 */
+	private boolean enableSignatureCheck;
+
+	/**
+	 * 验签秘钥
+	 */
+	private String signSecret;
+
+	/**
 	 * @return the phoneNum
 	 */
 	public String[] getPhoneNum() {
@@ -42,9 +52,26 @@ public class DingDingExceptionNoticeProperty {
 		this.webHook = webHook;
 	}
 
+	public boolean isEnableSignatureCheck() {
+		return enableSignatureCheck;
+	}
+
+	public void setEnableSignatureCheck(boolean enableSignatureCheck) {
+		this.enableSignatureCheck = enableSignatureCheck;
+	}
+
+	public String getSignSecret() {
+		return signSecret;
+	}
+
+	public void setSignSecret(String signSecret) {
+		this.signSecret = signSecret;
+	}
+
 	@Override
 	public String toString() {
-		return "DingDingExceptionNoticeProperty [phoneNum=" + Arrays.toString(phoneNum) + ", webHook=" + webHook + "]";
+		return "DingDingExceptionNoticeProperty [phoneNum=" + Arrays.toString(phoneNum) + ", webHook=" + webHook
+				+ ", enableSignatureCheck=" + enableSignatureCheck + ", signSecret=" + signSecret + "]";
 	}
 
 }
