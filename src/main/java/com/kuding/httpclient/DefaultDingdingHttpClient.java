@@ -1,5 +1,7 @@
 package com.kuding.httpclient;
 
+import java.net.URI;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ public class DefaultDingdingHttpClient implements DingdingHttpClient {
 	}
 
 	@Override
-	public DingDingResult post(String url, DingDingNotice body, Class<DingDingResult> clazz) {
+	public DingDingResult post(URI url, DingDingNotice body, Class<DingDingResult> clazz) {
 		ResponseEntity<DingDingResult> response = restTemplate.postForEntity(url, body, clazz);
 		if (response.getStatusCode() == HttpStatus.OK) {
 			if (logger.isDebugEnabled())
