@@ -1,7 +1,6 @@
 package com.kuding.exceptionhandle.decorated;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,7 +58,7 @@ public class AsyncExceptionNoticeHandler implements ExceptionNoticeHandlerDecora
 		@Override
 		public void run() {
 			try {
-				TimeUnit.SECONDS.sleep(10);
+//				TimeUnit.SECONDS.sleep(10);
 				getExceptionHandler().createNotice(blamedFor, exception, method, args);
 			} catch (Exception e) {
 				logger.warn("异常通知出错：", e);
@@ -89,7 +88,7 @@ public class AsyncExceptionNoticeHandler implements ExceptionNoticeHandlerDecora
 		@Override
 		public void run() {
 			try {
-				TimeUnit.SECONDS.sleep(10);
+//				TimeUnit.SECONDS.sleep(10);
 				getExceptionHandler().createHttpNotice(blamedFor, exception, url, param, requesBody, headers);
 			} catch (Exception e) {
 				logger.warn("异常通知出错：", e);
