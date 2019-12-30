@@ -2,7 +2,6 @@ package com.kuding.exceptionhandle;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,11 +36,33 @@ public class ExceptionHandler {
 	private final Log logger = LogFactory.getLog(getClass());
 
 	public ExceptionHandler(ExceptionNoticeProperty exceptionNoticeProperty,
-			Collection<INoticeSendComponent> noticeSendComponents,
 			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
 		this.exceptionNoticeFrequencyStrategy = exceptionNoticeFrequencyStrategy;
-		noticeSendComponents.forEach(x -> x.getAllBuddies().forEach(y -> blameMap.putIfAbsent(y, x)));
 		this.exceptionNoticeProperty = exceptionNoticeProperty;
+	}
+
+	public ExceptionNoticeProperty getExceptionNoticeProperty() {
+		return exceptionNoticeProperty;
+	}
+
+	public void setExceptionNoticeProperty(ExceptionNoticeProperty exceptionNoticeProperty) {
+		this.exceptionNoticeProperty = exceptionNoticeProperty;
+	}
+
+	public ExceptionNoticeFrequencyStrategy getExceptionNoticeFrequencyStrategy() {
+		return exceptionNoticeFrequencyStrategy;
+	}
+
+	public void setExceptionNoticeFrequencyStrategy(ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
+		this.exceptionNoticeFrequencyStrategy = exceptionNoticeFrequencyStrategy;
+	}
+
+	public ExceptionRedisStorageComponent getExceptionRedisStorageComponent() {
+		return exceptionRedisStorageComponent;
+	}
+
+	public Map<String, INoticeSendComponent> getBlameMap() {
+		return blameMap;
 	}
 
 	/**

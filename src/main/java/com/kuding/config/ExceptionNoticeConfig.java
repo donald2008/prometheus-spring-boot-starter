@@ -1,10 +1,10 @@
 package com.kuding.config;
 
 import java.time.Duration;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,17 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
-import com.kuding.aop.ExceptionNoticeAop;
 import com.kuding.exceptionhandle.ExceptionHandler;
-import com.kuding.exceptionhandle.decorated.DefaultExceptionNoticeHandler;
-import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 import com.kuding.httpclient.DefaultDingdingHttpClient;
 import com.kuding.httpclient.DingdingHttpClient;
 import com.kuding.markdown.DefaultMarkdownHttpMessageResolver;
 import com.kuding.markdown.DefaultMarkdownMessageResolver;
-import com.kuding.message.DingDingNoticeSendComponent;
-import com.kuding.message.INoticeSendComponent;
-import com.kuding.properties.DingDingExceptionNoticeProperty;
 import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
 import com.kuding.properties.ExceptionNoticeProperty;
 import com.kuding.properties.enums.DingdingTextType;
@@ -35,7 +29,6 @@ import com.kuding.text.ExceptionNoticeResolverFactory;
 
 @Configuration
 @EnableConfigurationProperties({ ExceptionNoticeProperty.class, ExceptionNoticeFrequencyStrategy.class })
-@ConditionalOnMissingBean({ ExceptionHandler.class })
 @ConditionalOnProperty(name = "exceptionnotice.open-notice", havingValue = "true", matchIfMissing = true)
 @EnableScheduling
 public class ExceptionNoticeConfig {
@@ -46,18 +39,25 @@ public class ExceptionNoticeConfig {
 	@Autowired
 	private ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
 
-	@Autowired(required = false)
-	private INoticeSendComponent noticeSendComponent;
-
 	@Autowired
 	private RestTemplateBuilder restTemplateBuilder;
 
-	@Bean
-	@ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "common", matchIfMissing = true)
-	@ConditionalOnMissingBean(ExceptionNoticeAop.class)
-	public ExceptionNoticeAop exceptionNoticeAop(ExceptionNoticeHandlerDecoration exceptionHandler) {
-		ExceptionNoticeAop aop = new ExceptionNoticeAop(exceptionHandler);
-		return aop;
+	private final ExceptionSendConfigComposite exceptionSendConfigComposite = new ExceptionSendConfigComposite();
+
+	private final Log logger = LogFactory.getLog(getClass());
+
+	public ExceptionNoticeConfig() {
+		logger.debug("------------加载ExceptionNoticeConfig");
+	}
+
+	@Autowired(required = false)
+	public void setSendConfig(List<ExceptionSendComponentConfigure> configures) {
+		logger.debug("发送组件数量：" + configures.size());
+		exceptionSendConfigComposite.addAll(configures);
+	}
+
+	private void regist(ExceptionHandler exceptionHandler) {
+		exceptionSendConfigComposite.regist(exceptionHandler);
 	}
 
 	@Bean
@@ -79,35 +79,17 @@ public class ExceptionNoticeConfig {
 	@ConditionalOnMissingBean({ ExceptionHandler.class })
 	public ExceptionHandler exceptionHandler(DingdingHttpClient httpClient,
 			ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
-		Map<String, DingDingExceptionNoticeProperty> dingding = exceptionNoticeProperty.getDingding();
-		List<INoticeSendComponent> list = new LinkedList<INoticeSendComponent>();
-		if (noticeSendComponent != null)
-			list.add(noticeSendComponent);
-		if (dingding != null && dingding.size() > 0) {
-			DingDingNoticeSendComponent component = new DingDingNoticeSendComponent(httpClient, exceptionNoticeProperty,
-					dingding, exceptionNoticeResolverFactory);
-			list.add(component);
-		}
-		ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty, list,
+		ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty,
 				exceptionNoticeFrequencyStrategy);
+		regist(exceptionHandler);
 		return exceptionHandler;
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(value = "exceptionnotice.enable-async-notice", matchIfMissing = true, havingValue = "false")
-	public ExceptionNoticeHandlerDecoration exceptionNoticeHandlerDecoration(ExceptionHandler exceptionHandler) {
-		ExceptionNoticeHandlerDecoration decoration = new DefaultExceptionNoticeHandler(exceptionHandler);
-		return decoration;
-	}
-
-	@Bean
-	@ConditionalOnMissingBean({ DingdingHttpClient.class })
 	public DingdingHttpClient dingdingHttpClient() {
 		RestTemplate restTemplate = restTemplateBuilder.setConnectTimeout(Duration.ofSeconds(20)).build();
 		DingdingHttpClient dingdingHttpClient = new DefaultDingdingHttpClient(restTemplate);
 		return dingdingHttpClient;
-
 	}
-
 }

@@ -4,12 +4,10 @@ import java.util.Map;
 
 import com.kuding.exceptionhandle.ExceptionHandler;
 
-public interface ExceptionNoticeHandlerDecoration{
-	
-	
+public interface ExceptionNoticeHandlerDecoration {
+
 	public ExceptionHandler getExceptionHandler();
-	
-	
+
 	/**
 	 * 最基础的异常通知的创建方法
 	 * 
@@ -21,8 +19,6 @@ public interface ExceptionNoticeHandlerDecoration{
 	default public void createNotice(String blamedFor, RuntimeException exception) {
 		getExceptionHandler().createNotice(blamedFor, exception);
 	}
-
-
 
 	/**
 	 * 反射方式获取方法中出现的异常进行的通知
@@ -52,5 +48,8 @@ public interface ExceptionNoticeHandlerDecoration{
 			Map<String, String> param, String requesBody, Map<String, String> headers) {
 		getExceptionHandler().createHttpNotice(blamedFor, exception, url, param, requesBody, headers);
 	}
-	
+
+	default public boolean check() {
+		return getExceptionHandler().getBlameMap().size() == 0;
+	}
 }

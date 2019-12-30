@@ -4,12 +4,14 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.kuding.exceptionhandle.ExceptionHandler;
 import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
+import com.kuding.exceptions.PrometheusException;
 
-public class AsyncExceptionNoticeHandler implements ExceptionNoticeHandlerDecoration {
+public class AsyncExceptionNoticeHandler implements ExceptionNoticeHandlerDecoration, InitializingBean {
 
 	private final ExceptionHandler exceptionHandler;
 
@@ -101,4 +103,10 @@ public class AsyncExceptionNoticeHandler implements ExceptionNoticeHandlerDecora
 		return exceptionHandler;
 	}
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if (check())
+			throw new PrometheusException("不存在异常通知的背锅侠，请设置后再试！！");
+		getExceptionHandler().getBlameMap().forEach((x, y) -> logger.debug(x + "-->" + y));
+	}
 }
