@@ -95,6 +95,11 @@ public class ExceptionNoticeProperty {
 	 */
 	private EmailTextType emailTextType = EmailTextType.TEXT;
 
+	/**
+	 * 是否开启异步通知
+	 */
+	private boolean enableAsyncNotice = false;
+
 	public ProjectEnviroment getProjectEnviroment() {
 		return projectEnviroment;
 	}
@@ -277,6 +282,14 @@ public class ExceptionNoticeProperty {
 	 */
 	public void setEmailTextType(EmailTextType emailTextType) {
 		this.emailTextType = emailTextType;
+	}
+
+	public boolean isEnableAsyncNotice() {
+		return enableAsyncNotice;
+	}
+
+	public void setEnableAsyncNotice(boolean enableAsyncNotice) {
+		this.enableAsyncNotice = enableAsyncNotice;
 	}
 
 }

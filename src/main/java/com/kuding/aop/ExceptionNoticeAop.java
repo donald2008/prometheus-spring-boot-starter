@@ -9,16 +9,16 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 
 import com.kuding.anno.ExceptionListener;
-import com.kuding.exceptionhandle.ExceptionHandler;
+import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 
 @Aspect
 public class ExceptionNoticeAop {
 
-	private ExceptionHandler exceptionHandler;
+	private ExceptionNoticeHandlerDecoration exceptionHandler;
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	public ExceptionNoticeAop(ExceptionHandler exceptionHandler) {
+	public ExceptionNoticeAop(ExceptionNoticeHandlerDecoration exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
 	}
 

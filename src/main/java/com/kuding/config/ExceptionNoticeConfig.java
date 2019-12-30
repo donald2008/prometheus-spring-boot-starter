@@ -17,6 +17,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.kuding.aop.ExceptionNoticeAop;
 import com.kuding.exceptionhandle.ExceptionHandler;
+import com.kuding.exceptionhandle.decorated.DefaultExceptionNoticeHandler;
+import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 import com.kuding.httpclient.DefaultDingdingHttpClient;
 import com.kuding.httpclient.DingdingHttpClient;
 import com.kuding.markdown.DefaultMarkdownHttpMessageResolver;
@@ -53,7 +55,7 @@ public class ExceptionNoticeConfig {
 	@Bean
 	@ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "common", matchIfMissing = true)
 	@ConditionalOnMissingBean(ExceptionNoticeAop.class)
-	public ExceptionNoticeAop exceptionNoticeAop(ExceptionHandler exceptionHandler) {
+	public ExceptionNoticeAop exceptionNoticeAop(ExceptionNoticeHandlerDecoration exceptionHandler) {
 		ExceptionNoticeAop aop = new ExceptionNoticeAop(exceptionHandler);
 		return aop;
 	}
@@ -89,6 +91,14 @@ public class ExceptionNoticeConfig {
 		ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty, list,
 				exceptionNoticeFrequencyStrategy);
 		return exceptionHandler;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(value = "exceptionnotice.enable-async-notice", matchIfMissing = true, havingValue = "false")
+	public ExceptionNoticeHandlerDecoration exceptionNoticeHandlerDecoration(ExceptionHandler exceptionHandler) {
+		ExceptionNoticeHandlerDecoration decoration = new DefaultExceptionNoticeHandler(exceptionHandler);
+		return decoration;
 	}
 
 	@Bean

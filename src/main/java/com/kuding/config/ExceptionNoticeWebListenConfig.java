@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import com.kuding.exceptionhandle.ExceptionHandler;
+import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 import com.kuding.properties.ExceptionNoticeProperty;
 import com.kuding.web.ClearBodyInterceptor;
 import com.kuding.web.CurrentRequestHeaderResolver;
@@ -29,11 +29,11 @@ import com.kuding.web.ExceptionNoticeResolver;
 @Configuration
 @ConditionalOnClass({ WebMvcConfigurer.class, RequestBodyAdvice.class, RequestMappingHandlerAdapter.class })
 @ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "web-mvc")
-@ConditionalOnBean({ ExceptionHandler.class })
+@ConditionalOnBean({ ExceptionNoticeHandlerDecoration.class })
 public class ExceptionNoticeWebListenConfig implements WebMvcConfigurer, WebMvcRegistrations {
 
 	@Autowired
-	private ExceptionHandler exceptionHandler;
+	private ExceptionNoticeHandlerDecoration exceptionHandler;
 	@Autowired
 	private ExceptionNoticeProperty exceptionNoticeProperty;
 
