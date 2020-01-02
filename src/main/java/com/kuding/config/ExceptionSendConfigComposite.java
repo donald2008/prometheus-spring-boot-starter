@@ -11,9 +11,9 @@ public class ExceptionSendConfigComposite implements ExceptionSendComponentConfi
 	private List<ExceptionSendComponentConfigure> list = new ArrayList<>();
 
 	@Override
-	public void regist(ExceptionHandler exceptionHandler) {
+	public void addSendComponent(ExceptionHandler exceptionHandler) {
 		for (ExceptionSendComponentConfigure exceptionSendComponentConfigure : list) {
-			exceptionSendComponentConfigure.regist(exceptionHandler);
+			exceptionSendComponentConfigure.addSendComponent(exceptionHandler);
 		}
 	}
 

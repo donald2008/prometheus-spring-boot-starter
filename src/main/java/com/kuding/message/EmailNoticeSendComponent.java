@@ -12,27 +12,29 @@ import org.springframework.mail.SimpleMailMessage;
 
 import com.kuding.content.ExceptionNotice;
 import com.kuding.properties.EmailExceptionNoticeProperty;
+import com.kuding.text.ExceptionNoticeResolverFactory;
 
 public class EmailNoticeSendComponent implements INoticeSendComponent {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private MailSender mailSender;
+	private final MailSender mailSender;
 
-	private MailProperties mailProperties;
+	private final ExceptionNoticeResolverFactory exceptionNoticeResolverFactory;
+
+	private final MailProperties mailProperties;
 
 	private Map<String, EmailExceptionNoticeProperty> map;
 
 	public EmailNoticeSendComponent(MailSender mailSender, MailProperties mailProperties,
-			Map<String, EmailExceptionNoticeProperty> map) {
+			Map<String, EmailExceptionNoticeProperty> map,
+			ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
 		this.mailSender = mailSender;
 		this.mailProperties = mailProperties;
 		this.map = map;
+		this.exceptionNoticeResolverFactory = exceptionNoticeResolverFactory;
 		checkAllEmails();
 
-	}
-
-	public EmailNoticeSendComponent() {
 	}
 
 	@Override
@@ -50,7 +52,7 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 			String[] bcc = emailExceptionNoticeProperty.getBcc();
 			if (bcc != null && bcc.length > 0)
 				mailMessage.setBcc(bcc);
-			mailMessage.setText(exceptionNotice.createText());
+			mailMessage.setText(exceptionNoticeResolverFactory.resolve("email", exceptionNotice));
 			mailMessage.setSubject(String.format("来自%s的异常提醒", exceptionNotice.getProject()));
 			mailSender.send(mailMessage);
 		} else
@@ -102,24 +104,10 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 	}
 
 	/**
-	 * @param mailSender the mailSender to set
-	 */
-	public void setMailSender(MailSender mailSender) {
-		this.mailSender = mailSender;
-	}
-
-	/**
 	 * @return the mailProperties
 	 */
 	public MailProperties getMailProperties() {
 		return mailProperties;
-	}
-
-	/**
-	 * @param mailProperties the mailProperties to set
-	 */
-	public void setMailProperties(MailProperties mailProperties) {
-		this.mailProperties = mailProperties;
 	}
 
 	/**

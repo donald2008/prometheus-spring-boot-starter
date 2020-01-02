@@ -18,13 +18,8 @@ import org.springframework.web.client.RestTemplate;
 import com.kuding.exceptionhandle.ExceptionHandler;
 import com.kuding.httpclient.DefaultDingdingHttpClient;
 import com.kuding.httpclient.DingdingHttpClient;
-import com.kuding.markdown.DefaultMarkdownHttpMessageResolver;
-import com.kuding.markdown.DefaultMarkdownMessageResolver;
 import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
 import com.kuding.properties.ExceptionNoticeProperty;
-import com.kuding.properties.enums.DingdingTextType;
-import com.kuding.properties.enums.ListenType;
-import com.kuding.text.ExceptionNoticeResolver;
 import com.kuding.text.ExceptionNoticeResolverFactory;
 
 @Configuration
@@ -57,22 +52,18 @@ public class ExceptionNoticeConfig {
 	}
 
 	private void regist(ExceptionHandler exceptionHandler) {
-		exceptionSendConfigComposite.regist(exceptionHandler);
+		exceptionSendConfigComposite.addSendComponent(exceptionHandler);
 	}
 
 	@Bean
-	@ConditionalOnMissingBean
 	public ExceptionNoticeResolverFactory exceptionNoticeResolverFactory() {
 		ExceptionNoticeResolverFactory exceptionNoticeResolverFactory = new ExceptionNoticeResolverFactory();
-		if (exceptionNoticeProperty.getDingdingTextType() == DingdingTextType.MARKDOWN) {
-			ExceptionNoticeResolver exceptionNoticeResolver = null;
-			if (exceptionNoticeProperty.getListenType() == ListenType.COMMON)
-				exceptionNoticeResolver = new DefaultMarkdownMessageResolver(exceptionNoticeProperty);
-			if (exceptionNoticeProperty.getListenType() == ListenType.WEB_MVC)
-				exceptionNoticeResolver = new DefaultMarkdownHttpMessageResolver(exceptionNoticeProperty);
-			exceptionNoticeResolverFactory.addNoticeResolver("dingding", exceptionNoticeResolver);
-		}
+		regist(exceptionNoticeResolverFactory);
 		return exceptionNoticeResolverFactory;
+	}
+
+	private void regist(ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
+		exceptionSendConfigComposite.addMessageResolver(exceptionNoticeResolverFactory);
 	}
 
 	@Bean
