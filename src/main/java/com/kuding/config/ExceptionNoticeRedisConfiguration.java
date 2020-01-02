@@ -1,7 +1,5 @@
 package com.kuding.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -20,22 +18,13 @@ import com.kuding.redis.ExceptionRedisStorageComponent;
 @Configuration
 @ConditionalOnClass({ StringRedisTemplate.class })
 @ConditionalOnProperty(name = "exceptionnotice.enable-redis-storage", havingValue = "true")
-@ConditionalOnMissingBean({ ExceptionRedisStorageComponent.class })
+@ConditionalOnMissingBean(value = { ExceptionRedisStorageComponent.class })
 @ConditionalOnBean({ ExceptionHandler.class })
 @AutoConfigureAfter({ ExceptionNoticeConfig.class })
 public class ExceptionNoticeRedisConfiguration {
 
 	@Autowired
 	private ExceptionNoticeProperty exceptionNoticeProperty;
-	
-	
-	private final Log logger = LogFactory.getLog(getClass());
-
-	public ExceptionNoticeRedisConfiguration() {
-		logger.debug("------------加载ExceptionNoticeRedisConfiguration");
-	}
-
-
 
 	@Bean
 	public ExceptionRedisStorageComponent exceptionRedisStorageComponent(StringRedisTemplate stringRedisTemplate,

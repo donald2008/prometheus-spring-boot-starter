@@ -1,7 +1,6 @@
 package com.kuding.config;
 
 import java.time.Duration;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,42 +36,23 @@ public class ExceptionNoticeConfig {
 	@Autowired
 	private RestTemplateBuilder restTemplateBuilder;
 
-	private final ExceptionSendConfigComposite exceptionSendConfigComposite = new ExceptionSendConfigComposite();
-
-	private final Log logger = LogFactory.getLog(getClass());
-
-	public ExceptionNoticeConfig() {
-		logger.debug("------------加载ExceptionNoticeConfig");
-	}
-
-	@Autowired(required = false)
-	public void setSendConfig(List<ExceptionSendComponentConfigure> configures) {
-		logger.debug("发送组件数量：" + configures.size());
-		exceptionSendConfigComposite.addAll(configures);
-	}
-
-	private void regist(ExceptionHandler exceptionHandler) {
-		exceptionSendConfigComposite.addSendComponent(exceptionHandler);
-	}
+	private final Log logger = LogFactory.getLog(ExceptionNoticeConfig.class);
 
 	@Bean
+	@ConditionalOnMissingBean
 	public ExceptionNoticeResolverFactory exceptionNoticeResolverFactory() {
+		logger.debug("创建resolverFactory");
 		ExceptionNoticeResolverFactory exceptionNoticeResolverFactory = new ExceptionNoticeResolverFactory();
-		regist(exceptionNoticeResolverFactory);
 		return exceptionNoticeResolverFactory;
 	}
 
-	private void regist(ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
-		exceptionSendConfigComposite.addMessageResolver(exceptionNoticeResolverFactory);
-	}
-
 	@Bean
-	@ConditionalOnMissingBean({ ExceptionHandler.class })
+	@ConditionalOnMissingBean
 	public ExceptionHandler exceptionHandler(DingdingHttpClient httpClient,
 			ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
+		logger.debug("创建exceptionHandler");
 		ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty,
 				exceptionNoticeFrequencyStrategy);
-		regist(exceptionHandler);
 		return exceptionHandler;
 	}
 

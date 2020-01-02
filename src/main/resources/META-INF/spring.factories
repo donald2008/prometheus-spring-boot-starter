@@ -4,4 +4,6 @@ com.kuding.config.ExceptionNoticeEmailConfig,\
 com.kuding.config.ExceptionNoticeRedisConfiguration,\
 com.kuding.config.ExceptionNoticeWebListenConfig,\
 com.kuding.config.ExceptionNoticeDecorationConfig,\
-com.kuding.config.ExceptionNoticeDingdingSendingConfig
+com.kuding.config.ExceptionNoticeDingdingSendingConfig,\
+com.kuding.config.ExceptionNoticeDingdingResolverConfig,\
+com.kuding.config.ExceptionNoticeCommonTypeConfig

@@ -1,10 +1,13 @@
 package com.kuding.config;
 
+import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -12,24 +15,38 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.kuding.config.interfaces.ExceptionNoticeResolverConfigure;
+import com.kuding.config.interfaces.ExceptionSendComponentConfigure;
 import com.kuding.exceptionhandle.ExceptionHandler;
 import com.kuding.exceptionhandle.decorated.AsyncExceptionNoticeHandler;
 import com.kuding.exceptionhandle.decorated.DefaultExceptionNoticeHandler;
 import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 import com.kuding.properties.ExceptionNoticeAsyncProperties;
+import com.kuding.text.ExceptionNoticeResolverFactory;
 
 @Configuration
-@ConditionalOnProperty(name = "exceptionnotice.open-notice", havingValue = "true", matchIfMissing = true)
+//@ConditionalOnProperty(name = "exceptionnotice.open-notice", havingValue = "true", matchIfMissing = true)
+@AutoConfigureAfter({ ExceptionNoticeConfig.class })
+@ConditionalOnBean({ ExceptionHandler.class, ExceptionNoticeResolverFactory.class })
 @EnableConfigurationProperties({ ExceptionNoticeAsyncProperties.class })
 public class ExceptionNoticeDecorationConfig {
 
 	@Autowired
 	private ExceptionNoticeAsyncProperties noticeAsyncProperties;
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private final Log logger = LogFactory.getLog(ExceptionNoticeDecorationConfig.class);
 
-	public ExceptionNoticeDecorationConfig() {
-		logger.debug("------------加载ExceptionNoticeDecorationConfig");
+	@Autowired(required = false)
+	public void setSendConfig(List<ExceptionSendComponentConfigure> configures, ExceptionHandler exceptionHandler) {
+		logger.debug("发送组件数量：" + configures.size());
+		configures.forEach(x -> x.addSendComponent(exceptionHandler));
+	}
+
+	@Autowired(required = false)
+	public void setResolverConfig(List<ExceptionNoticeResolverConfigure> configures,
+			ExceptionNoticeResolverFactory exceptionNoticeResolverFactory) {
+		logger.debug("解析组件数量：" + configures.size());
+		configures.forEach(x -> x.addResolver(exceptionNoticeResolverFactory));
 	}
 
 	@Bean

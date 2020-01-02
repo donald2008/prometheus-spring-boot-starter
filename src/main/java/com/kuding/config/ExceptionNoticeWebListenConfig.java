@@ -3,9 +3,8 @@ package com.kuding.config;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -29,7 +28,7 @@ import com.kuding.web.DefaultRequestHeaderResolver;
 import com.kuding.web.ExceptionNoticeResolver;
 
 @Configuration
-//@AutoConfigureAfter({ ExceptionNoticeDecorationConfig.class })
+@AutoConfigureAfter({ ExceptionNoticeDecorationConfig.class })
 @ConditionalOnClass({ WebMvcConfigurer.class, RequestBodyAdvice.class, RequestMappingHandlerAdapter.class })
 @ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "web-mvc")
 @ConditionalOnBean({ ExceptionNoticeHandlerDecoration.class })
@@ -40,12 +39,6 @@ public class ExceptionNoticeWebListenConfig implements WebMvcConfigurer, WebMvcR
 	@Autowired
 	private ExceptionNoticeProperty exceptionNoticeProperty;
 
-	private final Log logger = LogFactory.getLog(getClass());
-
-	public ExceptionNoticeWebListenConfig() {
-		logger.debug("------------加载ExceptionNoticeWebListenConfig");
-	}
-
 	@Override
 	public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
 		resolvers.add(0, exceptionNoticeResolver());
@@ -53,7 +46,6 @@ public class ExceptionNoticeWebListenConfig implements WebMvcConfigurer, WebMvcR
 
 	@Bean
 	public ExceptionNoticeResolver exceptionNoticeResolver() {
-		logger.debug("创建异常解析器");
 		ExceptionNoticeResolver exceptionNoticeResolver = new ExceptionNoticeResolver(exceptionHandler,
 				currentRequetBodyResolver(), currentRequestHeaderResolver(), exceptionNoticeProperty);
 		return exceptionNoticeResolver;

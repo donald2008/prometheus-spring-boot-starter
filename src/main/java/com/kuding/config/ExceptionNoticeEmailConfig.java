@@ -2,8 +2,6 @@ package com.kuding.config;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -12,6 +10,7 @@ import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSender;
 
+import com.kuding.config.interfaces.ExceptionSendComponentConfigure;
 import com.kuding.exceptionhandle.ExceptionHandler;
 import com.kuding.message.EmailNoticeSendComponent;
 import com.kuding.properties.EmailExceptionNoticeProperty;
@@ -20,7 +19,7 @@ import com.kuding.text.ExceptionNoticeResolverFactory;
 
 @Configuration
 @AutoConfigureAfter({ MailSenderAutoConfiguration.class })
-@ConditionalOnBean({ MailSender.class, ExceptionHandler.class })
+@ConditionalOnBean({ MailSender.class, ExceptionHandler.class, ExceptionNoticeResolverFactory.class })
 public class ExceptionNoticeEmailConfig implements ExceptionSendComponentConfigure {
 
 	@Autowired
@@ -31,12 +30,6 @@ public class ExceptionNoticeEmailConfig implements ExceptionSendComponentConfigu
 	private ExceptionNoticeProperty exceptionNoticeProperty;
 	@Autowired
 	private ExceptionNoticeResolverFactory exceptionNoticeResolverFactory;
-
-	private final Log logger = LogFactory.getLog(getClass());
-
-	public ExceptionNoticeEmailConfig() {
-		logger.debug("------------加载ExceptionNoticeEmailConfig");
-	}
 
 	@Override
 	public void addSendComponent(ExceptionHandler exceptionHandler) {
