@@ -187,7 +187,7 @@ public class DemoController {
 ![请求异常通知](/src/main/resources/mvcnormal.png)
 
 - 实际上钉钉机器人提供了很多其他的消息类型，这里适配了**钉钉的markdown**文本输出，只需要配置``exceptionnotice.dingding-text-type=markdown``即可，最终你可以得到以下面类似的效果：
-![请求异常通知markdown](/src/main/resources/mvcmarkdown.png.png)
+![请求异常通知markdown](/src/main/resources/mvcmarkdown.png)
 
 - 项目中的异常一般分类两大类：第一类为未捕获异常，第二类为业务异常。业务异常一般由用户自己定义的异常，在javaweb项目中，假如用户的请求不满足返回结果的条件，一般是需要主动抛出自定义异常的，所以这类异常并不需要进行通知。排除不需要异常通知的配置如下：
 ```
