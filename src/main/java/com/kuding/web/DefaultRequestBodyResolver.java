@@ -26,7 +26,7 @@ public class DefaultRequestBodyResolver extends RequestBodyAdviceAdapter impleme
 			bodyStr = stringBuilder.substring(0, 500) + "...";
 		else
 			bodyStr = stringBuilder.toString();
-		logger.debug("请求体信息：" + bodyStr);
+		logger.debug("请求体信息：" + body);
 		currentRequestBodyInfo.set(bodyStr);
 		return body;
 	}
@@ -45,6 +45,6 @@ public class DefaultRequestBodyResolver extends RequestBodyAdviceAdapter impleme
 
 	public void remove() {
 		currentRequestBodyInfo.remove();
-	}
+	} 
 
 }
