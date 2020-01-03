@@ -23,9 +23,9 @@ public class ExceptionNoticeResolverFactory {
 		return notice;
 	}
 
-	public void addNoticeResolver(String reslveKey, ExceptionNoticeResolver resolver) {
-		logger.debug("添加解析器-->" + reslveKey);
-		resolverMap.put(reslveKey, resolver);
+	public void addNoticeResolver(String resolveKey, ExceptionNoticeResolver resolver) {
+		logger.debug("添加解析器-->" + resolveKey + "---" + resolver.getClass());
+		resolverMap.putIfAbsent(resolveKey, resolver);
 	}
 
 	public Map<String, ExceptionNoticeResolver> getResolverMap() {
