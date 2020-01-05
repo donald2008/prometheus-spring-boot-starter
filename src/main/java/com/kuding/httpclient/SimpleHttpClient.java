@@ -27,6 +27,7 @@ import org.apache.http.util.EntityUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+@Deprecated
 public class SimpleHttpClient {
 
 	private Gson gson;
@@ -39,7 +40,7 @@ public class SimpleHttpClient {
 
 	private final String defaultContentType = "application/json; charset=utf-8";
 
-	public <K> String doPost(String url, K jsonParam, Map<String, String > headers)
+	public <K> String doPost(String url, K jsonParam, Map<String, String> headers)
 			throws ClientProtocolException, IOException {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost post = new HttpPost(url);

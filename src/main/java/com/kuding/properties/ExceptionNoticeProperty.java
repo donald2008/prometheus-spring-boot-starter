@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.kuding.properties.enums.ListenType;
 import com.kuding.properties.enums.NoticeType;
+import com.kuding.properties.enums.ProjectEnviroment;
 
 @ConfigurationProperties(prefix = "exceptionnotice")
 public class ExceptionNoticeProperty {
@@ -28,6 +29,11 @@ public class ExceptionNoticeProperty {
 	 */
 	@Value("${spring.application.name:${exceptionnotice.project-name:project}}")
 	private String projectName;
+
+	/**
+	 * 工程的发布环境，主要分为5个：开发环境、测试环境、预发环境、正式环境与回滚环境
+	 */
+	private ProjectEnviroment projectEnviroment;
 
 	/**
 	 * <p>
@@ -66,6 +72,19 @@ public class ExceptionNoticeProperty {
 	 * 异常通知类型，目前有三种，钉钉，邮件与自定义
 	 */
 	private NoticeType noticeType;
+
+	/**
+	 * 是否开启异步通知
+	 */
+	private boolean enableAsyncNotice = false;
+
+	public ProjectEnviroment getProjectEnviroment() {
+		return projectEnviroment;
+	}
+
+	public void setProjectEnviroment(ProjectEnviroment projectEnviroment) {
+		this.projectEnviroment = projectEnviroment;
+	}
 
 	/**
 	 * @return the openNotice
@@ -193,12 +212,12 @@ public class ExceptionNoticeProperty {
 		this.noticeType = noticeType;
 	}
 
-	@Override
-	public String toString() {
-		return "ExceptionNoticeProperty [openNotice=" + openNotice + ", includedTracePackage=" + includedTracePackage
-				+ ", projectName=" + projectName + ", listenType=" + listenType + ", enableRedisStorage="
-				+ enableRedisStorage + ", redisKey=" + redisKey + ", excludeExceptions=" + excludeExceptions
-				+ ", includeHeaderName=" + includeHeaderName + ", noticeType=" + noticeType + "]";
+	public boolean isEnableAsyncNotice() {
+		return enableAsyncNotice;
+	}
+
+	public void setEnableAsyncNotice(boolean enableAsyncNotice) {
+		this.enableAsyncNotice = enableAsyncNotice;
 	}
 
 }

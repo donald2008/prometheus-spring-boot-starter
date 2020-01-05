@@ -2,32 +2,34 @@ package com.kuding.message;
 
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
 import com.kuding.content.ExceptionNotice;
 import com.kuding.properties.EmailExceptionNoticeProperty;
+import com.kuding.text.ExceptionNoticeResolver;
 
 public class EmailNoticeSendComponent implements INoticeSendComponent {
 
-	private final Log logger = LogFactory.getLog(getClass());
+//	private final Log logger = LogFactory.getLog(getClass());
 
 	private final MailSender mailSender;
+
+	private final ExceptionNoticeResolver exceptionNoticeResolver;
 
 	private final MailProperties mailProperties;
 
 	private final EmailExceptionNoticeProperty emailExceptionNoticeProperty;
 
 	public EmailNoticeSendComponent(MailSender mailSender, MailProperties mailProperties,
-			EmailExceptionNoticeProperty emailExceptionNoticeProperty) {
+			EmailExceptionNoticeProperty emailExceptionNoticeProperty,
+			ExceptionNoticeResolver exceptionNoticeResolver) {
 		this.mailSender = mailSender;
 		this.mailProperties = mailProperties;
 		this.emailExceptionNoticeProperty = emailExceptionNoticeProperty;
 		checkAllEmails(emailExceptionNoticeProperty);
-
+		this.exceptionNoticeResolver = exceptionNoticeResolver;
 	}
 
 	@Override
@@ -42,7 +44,7 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 		String[] bcc = emailExceptionNoticeProperty.getBcc();
 		if (bcc != null && bcc.length > 0)
 			mailMessage.setBcc(bcc);
-		mailMessage.setText(exceptionNotice.createText());
+		mailMessage.setText(exceptionNoticeResolver.resolve(exceptionNotice));
 		mailMessage.setSubject(String.format("来自%s的异常提醒", exceptionNotice.getProject()));
 		mailSender.send(mailMessage);
 	}

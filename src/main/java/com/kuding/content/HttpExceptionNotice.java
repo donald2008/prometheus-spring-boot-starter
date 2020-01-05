@@ -5,17 +5,9 @@ import static java.util.stream.Collectors.toList;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import com.kuding.properties.enums.ProjectEnviroment;
+
 public class HttpExceptionNotice extends ExceptionNotice {
-
-	public HttpExceptionNotice(RuntimeException exception, String filter, String url, Map<String, String> param,
-			String requestBody, Map<String, String> headers) {
-		super(exception, filter, null);
-		this.url = url;
-		this.paramInfo = param;
-		this.requestBody = requestBody;
-		this.headers = headers;
-
-	}
 
 	protected String url;
 
@@ -24,6 +16,16 @@ public class HttpExceptionNotice extends ExceptionNotice {
 	protected String requestBody;
 
 	protected Map<String, String> headers;
+
+	public HttpExceptionNotice(RuntimeException exception, String filter, String url, Map<String, String> param,
+			String requestBody, Map<String, String> headers, ProjectEnviroment projectEnviroment) {
+		super(exception, filter, null, projectEnviroment);
+		this.url = url;
+		this.paramInfo = param;
+		this.requestBody = requestBody;
+		this.headers = headers;
+
+	}
 
 	/**
 	 * @return the url
@@ -89,7 +91,8 @@ public class HttpExceptionNotice extends ExceptionNotice {
 	@Override
 	public String createText() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("工程信息：").append(project).append("\r\n");
+		stringBuilder.append("工程信息：").append(project).append("(").append(projectEnviroment.getName()).append(")")
+				.append("\r\n");
 		stringBuilder.append("接口地址：").append(url).append("\r\n");
 		if (paramInfo != null && paramInfo.size() > 0) {
 			stringBuilder.append("接口参数：").append("\r\n")
@@ -113,7 +116,7 @@ public class HttpExceptionNotice extends ExceptionNotice {
 					.append(String.join("\t,\t", parames.stream().map(x -> x.toString()).collect(toList())))
 					.append("\r\n");
 		}
-		stringBuilder.append("异常信息：").append(exceptionMessage).append("\r\n");
+		stringBuilder.append("异常信息：").append(String.join("\r\n caused by: ", exceptionMessage)).append("\r\n");
 		stringBuilder.append("异常追踪：").append("\r\n").append(String.join("\r\n", traceInfo)).append("\r\n");
 		stringBuilder.append("最后一次出现时间：")
 				.append(latestShowTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\r\n");
