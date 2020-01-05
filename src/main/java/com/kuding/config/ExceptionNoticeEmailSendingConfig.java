@@ -22,7 +22,7 @@ import com.kuding.text.ExceptionNoticeResolver;
 @ConditionalOnBean({ MailSender.class, MailProperties.class })
 @ConditionalOnProperty(name = "exceptionnotice.open-notice", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties({ EmailExceptionNoticeProperty.class })
-public class ExceptionNoticeEmailConfig {
+public class ExceptionNoticeEmailSendingConfig {
 
 	@Autowired
 	private MailSender mailSender;
