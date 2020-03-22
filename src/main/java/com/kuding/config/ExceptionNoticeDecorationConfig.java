@@ -33,7 +33,7 @@ public class ExceptionNoticeDecorationConfig {
 	private final Log logger = LogFactory.getLog(ExceptionNoticeDecorationConfig.class);
 
 	@Bean
-	@ConditionalOnProperty(value = "exceptionnotice.enable-async-notice", havingValue = "true")
+	@ConditionalOnProperty(value = "exceptionnotice.async.enabled", havingValue = "true")
 	public ExceptionNoticeHandlerDecoration exceptionNoticeHandlerDecoration(ExceptionHandler exceptionHandler) {
 		logger.debug("创建异步通知组件");
 		ThreadPoolTaskExecutor poolTaskExecutor = new ThreadPoolTaskExecutor();
@@ -52,7 +52,7 @@ public class ExceptionNoticeDecorationConfig {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(value = "exceptionnotice.enable-async-notice", matchIfMissing = true, havingValue = "false")
+	@ConditionalOnProperty(value = "exceptionnotice.async.enabled", matchIfMissing = true, havingValue = "false")
 	public ExceptionNoticeHandlerDecoration defaultExceptionNoticeHandlerDecoration(ExceptionHandler exceptionHandler) {
 		logger.debug("创建默认通知组件");
 		ExceptionNoticeHandlerDecoration decoration = new DefaultExceptionNoticeHandler(exceptionHandler);

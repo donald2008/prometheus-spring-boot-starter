@@ -1,33 +1,19 @@
 # 一个异常通知的spring-boot-start框架 prometheus-spring-boot-starter
 
-
-## 重要更新
-
-团队版迎来一次大更新，个人版本后续会进行大更新
-
-
-## 团队版 2020-01-03更新（大更新）
-
-1. 版本号正式升级为**0.5.1-team**
-2. 新增：**异步通知**
-3. 新增：异常通知文本结构自定义
-4. 新增：异常通知的**环境类型**
-5. 新增：钉钉的**markdown文本支持**
-6. 新增：**钉钉的加签验证**
-7. 改进：自定义钉钉通知流程
-8. 改进：config自动化配置
-9. 改进：钉钉的调用所需的HTTPclient可自行配置，默认配置改为spring中resttemplate，原来的SimpleHttpclient已被废弃，这意味着依赖中需要spring-boot-starter-web
-10. 改进：对于异常信息中caused by进行了处理
-11. 修复bug
-
-多人协作开发需要异常通知请移步：[团队版分支](https://gitee.com/ITEater/prometheus-spring-boot-starter/tree/team/)
-
 #### 前言的前言：
 
 
 - 个人用异常通知请移步：[个人版分支](https://gitee.com/ITEater/prometheus-spring-boot-starter/tree/personal/)
 
 - 多人协作开发需要异常通知请移步：[团队版分支](https://gitee.com/ITEater/prometheus-spring-boot-starter/tree/team/)
+
+
+## 2020-03-22更新（个人版更新）
+
+1. 新增：包含现有团队版的所有功能
+2. 改进：调整了内部ExceptionNoticeResolver的叫法
+3. 改进：异常通知的存储方式
+
 
 
 ## 2020-01-03更新（大更新）
@@ -64,7 +50,7 @@
 
 ## 当前版本
 
-![目前工程版本](https://img.shields.io/badge/version-0.5.1--team-green.svg?style=for-the-badge&logo=appveyor)
+![目前工程版本](https://img.shields.io/badge/version-0.4.1--personal-green.svg?style=for-the-badge&logo=appveyor)
 
 
 ## 最快上手
@@ -75,21 +61,18 @@
 		<dependency>
 			<groupId>com.kuding</groupId>
 			<artifactId>prometheus-spring-boot-starter</artifactId>
-			<version>0.5.1-team</version>
+			<version>0.4.1-personal</version>
 		</dependency>
 ```
 3. 在``application.properties``或者``application.yml``中做如下的配置：（至于以上的配置说明后面的章节会讲到）
 ```
 exceptionnotice:
   open-notice: true
-  default-notice: user1
   project-enviroment: develop
   included-trace-package:你的工程目录
-  
   dingding:    
-    user1:
-      phone-num: 手机号（数组）
-      web-hook: 钉钉的webhook
+    phone-num: 手机号（数组）
+    web-hook: 钉钉的webhook
 ```
 4. 至于钉钉的配置请移步：[钉钉机器人](https://open-doc.dingtalk.com/microapp/serverapi2/krgddi "自定义机器人")，这里需要特别说明一下，钉钉在2019年10月份（大概）对于钉钉机器人进行了一次改进,这次改进主要是安全设置变为必选项，原来已经配置过的钉钉机器人且没有配置安全设置的不受影响
 ![钉钉改进](/src/main/resources/dingdingupgrade.png)
@@ -140,50 +123,99 @@ public class DemoApplicationTests {
 ### 配置
 
 本框架配置主要分为4部分：
+
 1. 全局配置
-2. 背锅用户配置
+2. 通知配置
 3. 策略配置
 4. 外援配置
 
 #### 全局配置
 
 - 下面是所有的全局配置（yml版）：
+
 ```
 exceptionnotice:
   open-notice: true
-  project-name: project
-  default-notice: user1
-  project-enviroment: develop/test/preview/release/rollback
-  dingding-text-type: text/markdown
-  email-text-type: text
-  included-trace-package: com.havefun
-  listen-type: common/web-mvc
+  project-name: XXX
+  included-trace-package: com.kuding
+  listen-type: common
+  notice-type: dingding
+  project-enviroment: develop
+  dingding:
+    phone-num: XXXX
+    web-hook: https://oapi.dingtalk.com/robot/send?access_token=XXXX
+    sign-secret: XXXX
+    enable-signature-check: true 
+    dingding-text-type: markdown
   include-header-name:
-  - headparam
-  enable-async-notice: true
-  enable-redis-storage: true
-  redis-key: exceptionnotice-demo
+  - name
+  - tenantId
   exclude-exceptions:
   - java.lang.IllegalArgumentException
+  strategy:
+    frequency-type: showcount
+    notice-show-count: 10
+    enabled: true
+  store:
+    enable-redis-storage: false
+    redis-key: XXX
+  email:
+    bcc:
+    - XXX
+    cc:
+    - XXX
+    email-text-type: text
+    to:
+    - XXX
+  enable-async-notice: false
+  async:
+    thread-name-prefix: prometheus-task-
+    core-pool-size: 1
+    max-pool-size: 100
+    daemon: false
+    queue-capacity: 100
 ```
 
 - 具体说明如下：
 
 |名称|参数类型|说明|必要配置|
 |:-:|:-:|:-:|:-:|
+|全局配置|
 |open-notice|boolean|用于开启异常通知（必填）|是|
 |project-name|string|一般忽略，以spring.application.name替代|否|
-|default-notice|string|默认的背锅侠，用于@ExceptionListener缺省value值|否|
-|project-enviroment|enum|表示此工程环境，用于标注是哪个环境中的工程出异常|是|
-|dingding-text-type|enum|钉钉通知的文本类型（默认为text）|否|
-|email-text-type|enum|邮件通知的文本类型（只有text，没做扩展）|否|
 |included-trace-package|string|异常追踪的包路径，一般情况下，此配置项就是配置你工程的包路径就可以了|是|
 |listen-type|enum|监听类型，有两种：**common/web-mvc**，默认为common|是|
-|include-header-name|list|（**web-mvc限定**）异常通知中需要包含的header信息(不写全部返回)|否|
-|enable-async-notice|boolean|是否开启**异步**通知（默认否）|否|
+|notice-type|enum|通知类型，有两种：**dingding/email**|是|
+|project-enviroment|enum|表示此工程环境，用于标注是哪个环境中的工程出异常|是|
+|exclude-exceptions|list|排除异常，表示这些异常不需要进行异常通知|否|
+|钉钉配置(dingding.)|
+|phone-num|list|通知人的手机号（可以多个）|是|
+|web-hook|string|钉钉机器人链接|是|
+|enable-signature-check|boolean|是否开始验签验证|否|
+|sign-secret|string|验签秘钥，开启验签验证后必填|否|
+|dingding-text-type|enum|钉钉通知的文本类型：text/markdown，默认为text|否|
+|邮件配置（email.）|
+|bcc|list|秘密抄送人的邮箱|否|
+|cc|list|抄送人的邮箱|否|
+|to|list|发送人邮箱|是|
+|email-text-type|enum|邮件通知的文本类型（只有text，没做扩展）|否|
+|web-mvc限定|
+|include-header-name|list|异常通知中需要包含的header信息(不写全部返回)|否|
+|异步配置(async.)|
+|enbaled|boolean|是否开启**异步**通知（默认否）|否|
+|thread-name-prefix|string|线程名称前缀|否|
+|core-pool-size|int|核心池数量|否|
+|max-pool-size|int|最大线程池数量|否|
+|daemon|boolean|是否需要守护线程|否|
+|策略配置（strategy）|
+|enabled|boolean|是否开启通知策略（默认否）|否|
+|frequency-type|enum|通知频率策略类型：showcount/timeout|是|
+|notice-show-count|int|当策略类型为showcount时，表示距上次通知再出钱多少次需要再次通知|否|
+|notice-time-interval|duration|当策略类型为timeout是，表示距上次通知经过多长时间后再次通知|否|
+|通知存储（store.）|
 |enable-redis-storage|boolean|是否开启redis存储（默认否）|否|
 |redis-key|string|(**开启redis限定**)redis存储的键值|否|
-|exclude-exceptions|list|排除异常，表示这些异常不需要进行异常通知|否|
+
 
 - 以上通知中**最重要**的当属``exceptionnotice.listen-type``,此配置表示工程的监听方式，目前有两种监听方式：**普通监听（common）** ；**mvc监听（web-mvc）** 。这两种监听方式各有千秋，普通监听方式主要运用aop的方式对有注解的方法或类进行监听，可以加在任何类与方法上。**mvc监听只能对controller层进行监听，对其它层无效**，不过异常通知的信息更丰富，不仅仅包括了普通监听的所有信息（不包含参数），还包含了请求中的路径信息（path）、参数信息（param）、请求中的请求体信息（body）和请求体中的头信息（header）。例如：
 ```
@@ -198,7 +230,7 @@ public class DemoController {
 	private CustomService customService;
 
 	@PostMapping("/dingding1/{pathParam}")
-	@ExceptionListener("user1")
+	@ExceptionListener
 	public String dingding1(@PathVariable @ApiParam(value = "来个路径参数", required = true) String pathParam,
 			@RequestParam @ApiParam(value = "来个参数", required = true) String param,
 			@RequestHeader @ApiParam(value = "来个请求头", required = true) String headParam,
@@ -226,7 +258,7 @@ exceptionnotice.redis-key=你自己的redis键
 ```
 **这里开启redis存储需要依赖spring-boot-starter-data-redis，需要用户自行配置**，不过目前redis的存储不建议使用，后续我会完善异常持久化的流程
 
-- 上一版本的异常通知由于是同步的，由于各种各样的原因，在异常通知失败时，框架本身可能也会产生一些异常，所以增加了异步通知，主要配置为``exceptionnotice.enable-async-notice=true``，开启异常配置需要配置一个自有的线程池，具体配置如下：
+- 上一版本的异常通知由于是同步的，由于各种各样的原因，在异常通知失败时，框架本身可能也会产生一些异常，所以增加了异步通知，主要配置为``exceptionnotice.async.enabled=true``，开启异常配置需要配置一个自有的线程池，具体配置如下：
 ```
 exceptionnotice:
   async:
@@ -238,42 +270,28 @@ exceptionnotice:
 ```
 以上配置实际上对应着spring中的``ThreadPoolTaskExecutor``一部分配置，配置的东西也比较简单，要是有具体的其他特殊的线程配置请留言提建议
 
-#### 背锅用户配置
+#### 通知配置
 
-- 背锅用户的配置分为两种类型：
-  1. 背锅钉钉通知用户
-  2. 背锅邮件通知用户
+- 通知配置一共三总类型：
+  1. 钉钉通知
+  2. 邮件通知
+  3. 自定义通知
 
-以上两种类型都通过map类型进行配置：
-```
-/**
-	 * 发送钉钉异常通知给谁
-	 */
-	Map<String, DingDingExceptionNoticeProperty> dingding;
-
-	/**
-	 * 发送邮件异常通知给谁
-	 */
-	Map<String, EmailExceptionNoticeProperty> email;
-```
-**其中map的key表示的是谁需要来背锅，也是注解``@ExceptionListener``所需要填写的参数的值**
-
-- 背锅钉钉通知的钉钉配置：
+- 钉钉通知配置：
 ```
 exceptionnotice:
   dingding:    
-    user1:
-      phone-num: 手机号（数组）
-      web-hook: 钉钉的web钩子
-      enable-signature-check: 是否开启签名验证（true/false）
-      sign-secret: 签名秘钥
-    user2：
-      ...........
+    phone-num: 手机号（数组）
+    web-hook: 钉钉的web钩子
+    enable-signature-check: 是否开启签名验证（true/false）
+    sign-secret: 签名秘钥
+
+   ...........
 ```
 开启签名验证时，需要在钉钉机器人的安全设置中选中*加签*设置：
 ![钉钉加签](/src/main/resources/dingdingsign.png)
 
-- 背锅邮件通知同样也延续了原来的邮件配置，同样依赖``spring-boot-starter-mail``及其配置
+- 邮件通知同样也延续了原来的邮件配置，同样依赖``spring-boot-starter-mail``及其配置
 ```
 spring:
   mail:
@@ -283,12 +301,12 @@ spring:
     password: 密码
 exceptionnotice:
   email:
-    user3:
-      from: 发件人
-      to: 给谁发
-      cc: 抄送给谁
-      bcc: 秘密抄送给谁
+    to: 给谁发
+    cc: 抄送给谁
+    bcc: 秘密抄送给谁
 ```
+
+- 框架内保留了通知所需的所有的接口，使用者可以自行定义自己的通知方式，详情请先往下看，后面有介绍
 
 #### 策略配置
 
@@ -465,7 +483,4 @@ public class MyExceptionTextResolverConfig implements ExceptionNoticeResolverCon
 
 #### 2、0.5.1-team这个版本默认需要依赖spring-boot-starter-web，所以在工程中配置此框架必须要引入spring-boot-starter-web，我这块还没处理好，所以对于非web项目目前请自行改造
 
-
-[![Fork me on Gitee](https://gitee.com/ITEater/prometheus-spring-boot-starter/widgets/widget_2.svg)](https://gitee.com/ITEater/prometheus-spring-boot-starter)
->>>>>>> refs/heads/team
->>>>>>> refs/heads/personal
+TODO 还没写完

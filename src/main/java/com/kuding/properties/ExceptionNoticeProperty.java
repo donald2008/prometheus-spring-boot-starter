@@ -63,11 +63,6 @@ public class ExceptionNoticeProperty {
 	 */
 	private NoticeType noticeType;
 
-	/**
-	 * 是否开启异步通知
-	 */
-	private boolean enableAsyncNotice = false;
-
 	public ProjectEnviroment getProjectEnviroment() {
 		return projectEnviroment;
 	}
@@ -172,14 +167,6 @@ public class ExceptionNoticeProperty {
 	 */
 	public void setNoticeType(NoticeType noticeType) {
 		this.noticeType = noticeType;
-	}
-
-	public boolean isEnableAsyncNotice() {
-		return enableAsyncNotice;
-	}
-
-	public void setEnableAsyncNotice(boolean enableAsyncNotice) {
-		this.enableAsyncNotice = enableAsyncNotice;
 	}
 
 }

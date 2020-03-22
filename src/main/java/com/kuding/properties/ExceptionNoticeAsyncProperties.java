@@ -5,6 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "exceptionnotice.async")
 public class ExceptionNoticeAsyncProperties {
 
+	private boolean enabled = false;
+
 	private int maxPoolSize = 100;
 
 	private int corePoolSize = 1;
@@ -53,6 +55,14 @@ public class ExceptionNoticeAsyncProperties {
 
 	public void setDaemon(boolean daemon) {
 		this.daemon = daemon;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }
