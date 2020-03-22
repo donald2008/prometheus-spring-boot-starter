@@ -1,5 +1,27 @@
 # 一个异常通知的spring-boot-start框架 prometheus-spring-boot-starter
 
+
+## 重要更新
+
+团队版迎来一次大更新，个人版本后续会进行大更新
+
+
+## 团队版 2020-01-03更新（大更新）
+
+1. 版本号正式升级为**0.5.1-team**
+2. 新增：**异步通知**
+3. 新增：异常通知文本结构自定义
+4. 新增：异常通知的**环境类型**
+5. 新增：钉钉的**markdown文本支持**
+6. 新增：**钉钉的加签验证**
+7. 改进：自定义钉钉通知流程
+8. 改进：config自动化配置
+9. 改进：钉钉的调用所需的HTTPclient可自行配置，默认配置改为spring中resttemplate，原来的SimpleHttpclient已被废弃，这意味着依赖中需要spring-boot-starter-web
+10. 改进：对于异常信息中caused by进行了处理
+11. 修复bug
+
+多人协作开发需要异常通知请移步：[团队版分支](https://gitee.com/ITEater/prometheus-spring-boot-starter/tree/team/)
+
 #### 前言的前言：
 
 
