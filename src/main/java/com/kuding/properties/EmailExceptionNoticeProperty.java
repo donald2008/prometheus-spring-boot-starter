@@ -2,6 +2,8 @@ package com.kuding.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import com.kuding.properties.enums.EmailTextType;
+
 @ConfigurationProperties(prefix = "exceptionnotice.email")
 public class EmailExceptionNoticeProperty {
 
@@ -19,6 +21,11 @@ public class EmailExceptionNoticeProperty {
 	 * 密抄送
 	 */
 	private String[] bcc;
+
+	/**
+	 * 邮件的通知文本类型
+	 */
+	private EmailTextType emailTextType = EmailTextType.TEXT;
 
 	/**
 	 * @return the to
@@ -60,6 +67,14 @@ public class EmailExceptionNoticeProperty {
 	 */
 	public void setBcc(String[] bcc) {
 		this.bcc = bcc;
+	}
+
+	public EmailTextType getEmailTextType() {
+		return emailTextType;
+	}
+
+	public void setEmailTextType(EmailTextType emailTextType) {
+		this.emailTextType = emailTextType;
 	}
 
 }

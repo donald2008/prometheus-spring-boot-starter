@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.kuding.properties.enums.ListenType;
 import com.kuding.properties.enums.NoticeType;
+import com.kuding.properties.enums.ProjectEnviroment;
 
 @ConfigurationProperties(prefix = "exceptionnotice")
 public class ExceptionNoticeProperty {
@@ -30,6 +31,11 @@ public class ExceptionNoticeProperty {
 	private String projectName;
 
 	/**
+	 * 工程的发布环境，主要分为5个：开发环境、测试环境、预发环境、正式环境与回滚环境
+	 */
+	private ProjectEnviroment projectEnviroment;
+
+	/**
 	 * <p>
 	 * 通过注解进行监控，目前提供两种方式：
 	 * </p>
@@ -41,16 +47,6 @@ public class ExceptionNoticeProperty {
 	 * </ol>
 	 */
 	private ListenType listenType = ListenType.COMMON;
-
-	/**
-	 * 开启redis存储
-	 */
-	private boolean enableRedisStorage;
-
-	/**
-	 * redis的键
-	 */
-	private String redisKey = "prometheus-notice";
 
 	/**
 	 * 排除的需要统计的异常
@@ -66,6 +62,19 @@ public class ExceptionNoticeProperty {
 	 * 异常通知类型，目前有三种，钉钉，邮件与自定义
 	 */
 	private NoticeType noticeType;
+
+	/**
+	 * 是否开启异步通知
+	 */
+	private boolean enableAsyncNotice = false;
+
+	public ProjectEnviroment getProjectEnviroment() {
+		return projectEnviroment;
+	}
+
+	public void setProjectEnviroment(ProjectEnviroment projectEnviroment) {
+		this.projectEnviroment = projectEnviroment;
+	}
 
 	/**
 	 * @return the openNotice
@@ -124,34 +133,6 @@ public class ExceptionNoticeProperty {
 	}
 
 	/**
-	 * @return the enableRedisStorage
-	 */
-	public boolean isEnableRedisStorage() {
-		return enableRedisStorage;
-	}
-
-	/**
-	 * @param enableRedisStorage the enableRedisStorage to set
-	 */
-	public void setEnableRedisStorage(boolean enableRedisStorage) {
-		this.enableRedisStorage = enableRedisStorage;
-	}
-
-	/**
-	 * @return the redisKey
-	 */
-	public String getRedisKey() {
-		return redisKey;
-	}
-
-	/**
-	 * @param redisKey the redisKey to set
-	 */
-	public void setRedisKey(String redisKey) {
-		this.redisKey = redisKey;
-	}
-
-	/**
 	 * @return the excludeExceptions
 	 */
 	public List<Class<? extends RuntimeException>> getExcludeExceptions() {
@@ -193,12 +174,12 @@ public class ExceptionNoticeProperty {
 		this.noticeType = noticeType;
 	}
 
-	@Override
-	public String toString() {
-		return "ExceptionNoticeProperty [openNotice=" + openNotice + ", includedTracePackage=" + includedTracePackage
-				+ ", projectName=" + projectName + ", listenType=" + listenType + ", enableRedisStorage="
-				+ enableRedisStorage + ", redisKey=" + redisKey + ", excludeExceptions=" + excludeExceptions
-				+ ", includeHeaderName=" + includeHeaderName + ", noticeType=" + noticeType + "]";
+	public boolean isEnableAsyncNotice() {
+		return enableAsyncNotice;
+	}
+
+	public void setEnableAsyncNotice(boolean enableAsyncNotice) {
+		this.enableAsyncNotice = enableAsyncNotice;
 	}
 
 }

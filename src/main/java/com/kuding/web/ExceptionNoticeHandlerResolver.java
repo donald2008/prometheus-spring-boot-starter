@@ -7,30 +7,25 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.kuding.anno.ExceptionListener;
-import com.kuding.content.HttpExceptionNotice;
-import com.kuding.exceptionhandle.ExceptionHandler;
+import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 import com.kuding.properties.ExceptionNoticeProperty;
 
-public class ExceptionNoticeResolver implements HandlerExceptionResolver {
+public class ExceptionNoticeHandlerResolver implements HandlerExceptionResolver {
 
-	private ExceptionHandler exceptionHandler;
+	private final ExceptionNoticeHandlerDecoration exceptionHandler;
 
-	private ExceptionNoticeProperty exceptionNoticeProperty;
+	private final ExceptionNoticeProperty exceptionNoticeProperty;
 
-	private CurrentRequetBodyResolver currentRequetBodyResolver;
+	private final CurrentRequetBodyResolver currentRequetBodyResolver;
 
-	private CurrentRequestHeaderResolver currentRequestHeaderResolver;
+	private final CurrentRequestHeaderResolver currentRequestHeaderResolver;
 
-	private final Log logger = LogFactory.getLog(getClass());
-
-	public ExceptionNoticeResolver(ExceptionHandler exceptionHandler,
+	public ExceptionNoticeHandlerResolver(ExceptionNoticeHandlerDecoration exceptionHandler,
 			CurrentRequetBodyResolver currentRequetBodyResolver,
 			CurrentRequestHeaderResolver currentRequestHeaderResolver,
 			ExceptionNoticeProperty exceptionNoticeProperty) {
@@ -38,14 +33,6 @@ public class ExceptionNoticeResolver implements HandlerExceptionResolver {
 		this.currentRequestHeaderResolver = currentRequestHeaderResolver;
 		this.currentRequetBodyResolver = currentRequetBodyResolver;
 		this.exceptionNoticeProperty = exceptionNoticeProperty;
-	}
-
-	public ExceptionHandler getExceptionHandler() {
-		return exceptionHandler;
-	}
-
-	public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-		this.exceptionHandler = exceptionHandler;
 	}
 
 	@Override
@@ -59,9 +46,8 @@ public class ExceptionNoticeResolver implements HandlerExceptionResolver {
 			handlerMethod = (HandlerMethod) handler;
 		ExceptionListener listener = getListener(handlerMethod);
 		if (listener != null && e != null && handler != null) {
-			HttpExceptionNotice exceptionNotice = exceptionHandler.createHttpNotice(e, request.getRequestURI(),
-					getParames(request), getRequestBody(), getHeader(request));
-			logger.debug(exceptionNotice);
+			exceptionHandler.createHttpNotice(e, request.getRequestURI(), getParames(request), getRequestBody(),
+					getHeader(request));
 		}
 		return null;
 	}

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.kuding.aop.ExceptionNoticeAop;
 import com.kuding.exceptionhandle.ExceptionHandler;
+import com.kuding.message.INoticeSendComponent;
 import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
 import com.kuding.properties.ExceptionNoticeProperty;
 
@@ -22,19 +22,14 @@ public class ExceptionNoticeConfig {
 	@Autowired
 	private ExceptionNoticeProperty exceptionNoticeProperty;
 
-	@Bean
-	@ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "common", matchIfMissing = true)
-	@ConditionalOnMissingBean
-	public ExceptionNoticeAop exceptionNoticeAop(ExceptionHandler exceptionHandler) {
-		ExceptionNoticeAop aop = new ExceptionNoticeAop(exceptionHandler);
-		return aop;
-	}
+	@Autowired
+	private ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
 
 	@Bean
 	@ConditionalOnMissingBean // 后续扩展时需要
-	public ExceptionHandler exceptionHandler(ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
+	public ExceptionHandler exceptionHandler(INoticeSendComponent sendComponent) {
 		ExceptionHandler exceptionHandler = new ExceptionHandler(exceptionNoticeProperty,
-				exceptionNoticeFrequencyStrategy);
+				exceptionNoticeFrequencyStrategy, sendComponent);
 		return exceptionHandler;
 	}
 

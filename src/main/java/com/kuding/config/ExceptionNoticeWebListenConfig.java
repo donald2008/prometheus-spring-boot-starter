@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -17,34 +18,35 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import com.kuding.exceptionhandle.ExceptionHandler;
+import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 import com.kuding.properties.ExceptionNoticeProperty;
 import com.kuding.web.ClearBodyInterceptor;
 import com.kuding.web.CurrentRequestHeaderResolver;
 import com.kuding.web.CurrentRequetBodyResolver;
 import com.kuding.web.DefaultRequestBodyResolver;
 import com.kuding.web.DefaultRequestHeaderResolver;
-import com.kuding.web.ExceptionNoticeResolver;
+import com.kuding.web.ExceptionNoticeHandlerResolver;
 
 @Configuration
+@AutoConfigureAfter({ ExceptionNoticeDecorationConfig.class })
 @ConditionalOnClass({ WebMvcConfigurer.class, RequestBodyAdvice.class, RequestMappingHandlerAdapter.class })
 @ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "web-mvc")
-@ConditionalOnBean({ ExceptionHandler.class })
+@ConditionalOnBean({ ExceptionNoticeHandlerDecoration.class })
 public class ExceptionNoticeWebListenConfig implements WebMvcConfigurer, WebMvcRegistrations {
 
 	@Autowired
-	private ExceptionHandler exceptionHandler;
+	private ExceptionNoticeHandlerDecoration exceptionHandler;
 	@Autowired
 	private ExceptionNoticeProperty exceptionNoticeProperty;
 
 	@Override
 	public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
-		resolvers.add(0, exceptionNoticeResolver());
+		resolvers.add(0, ExceptionNoticeHandlerResolver());
 	}
 
 	@Bean
-	public ExceptionNoticeResolver exceptionNoticeResolver() {
-		ExceptionNoticeResolver exceptionNoticeResolver = new ExceptionNoticeResolver(exceptionHandler,
+	public ExceptionNoticeHandlerResolver ExceptionNoticeHandlerResolver() {
+		ExceptionNoticeHandlerResolver exceptionNoticeResolver = new ExceptionNoticeHandlerResolver(exceptionHandler,
 				currentRequetBodyResolver(), currentRequestHeaderResolver(), exceptionNoticeProperty);
 		return exceptionNoticeResolver;
 	}

@@ -12,18 +12,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSender;
 
-import com.kuding.exceptionhandle.ExceptionHandler;
 import com.kuding.message.EmailNoticeSendComponent;
 import com.kuding.message.INoticeSendComponent;
 import com.kuding.properties.EmailExceptionNoticeProperty;
+import com.kuding.text.ExceptionNoticeTextResolver;
 
 @Configuration
-@AutoConfigureAfter({ MailSenderAutoConfiguration.class, ExceptionNoticeConfig.class })
-@ConditionalOnBean({ MailSender.class, MailProperties.class, ExceptionHandler.class })
-@ConditionalOnMissingBean(INoticeSendComponent.class)
-@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "email")
+@AutoConfigureAfter({ MailSenderAutoConfiguration.class })
+@ConditionalOnBean({ MailSender.class, MailProperties.class })
+@ConditionalOnProperty(name = "exceptionnotice.open-notice", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties({ EmailExceptionNoticeProperty.class })
-public class ExceptionNoticeEmailConfig {
+public class ExceptionNoticeEmailSendingConfig {
 
 	@Autowired
 	private MailSender mailSender;
@@ -34,10 +33,17 @@ public class ExceptionNoticeEmailConfig {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public EmailNoticeSendComponent emailNoticeSendComponent(ExceptionHandler exceptionHandler) {
-		EmailNoticeSendComponent component = new EmailNoticeSendComponent(mailSender, mailProperties,
-				emailExceptionNoticeProperty);
-		exceptionHandler.setSendComponent(component);
+	@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "email")
+	public INoticeSendComponent emailNoticeSendComponent(ExceptionNoticeTextResolver exceptionNoticeResolver) {
+		INoticeSendComponent component = new EmailNoticeSendComponent(mailSender, mailProperties,
+				emailExceptionNoticeProperty, exceptionNoticeResolver);
 		return component;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "email")
+	public ExceptionNoticeTextResolver ExceptionNoticeTextResolver() {
+		return x -> x.createText();
 	}
 }

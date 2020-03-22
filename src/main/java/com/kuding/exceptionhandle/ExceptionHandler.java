@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,34 +18,44 @@ import com.kuding.message.INoticeSendComponent;
 import com.kuding.pojos.ExceptionStatistics;
 import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
 import com.kuding.properties.ExceptionNoticeProperty;
-import com.kuding.redis.ExceptionRedisStorageComponent;
+import com.kuding.storage.ExceptionNoticeStorage;
 
 public class ExceptionHandler {
 
-	private ExceptionRedisStorageComponent exceptionRedisStorageComponent;
+	private ExceptionNoticeStorage exceptionNoticeStorage = x -> {
+	};
 
 	private final ExceptionNoticeProperty exceptionNoticeProperty;
 
 	private final ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
 
-	private INoticeSendComponent sendComponent;
+	private final INoticeSendComponent sendComponent;
 
 	private final Map<String, ExceptionStatistics> checkUid = Collections.synchronizedMap(new HashMap<>());
 
 	private final Log logger = LogFactory.getLog(getClass());
 
 	public ExceptionHandler(ExceptionNoticeProperty exceptionNoticeProperty,
-			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
+			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy, INoticeSendComponent sendComponent) {
 		this.exceptionNoticeProperty = exceptionNoticeProperty;
 		this.exceptionNoticeFrequencyStrategy = exceptionNoticeFrequencyStrategy;
+		this.sendComponent = sendComponent;
 	}
 
-	/**
-	 * @param exceptionRedisStorageComponent the exceptionRedisStorageComponent to
-	 *                                       set
-	 */
-	public void setExceptionRedisStorageComponent(ExceptionRedisStorageComponent exceptionRedisStorageComponent) {
-		this.exceptionRedisStorageComponent = exceptionRedisStorageComponent;
+	public ExceptionNoticeProperty getExceptionNoticeProperty() {
+		return exceptionNoticeProperty;
+	}
+
+	public ExceptionNoticeFrequencyStrategy getExceptionNoticeFrequencyStrategy() {
+		return exceptionNoticeFrequencyStrategy;
+	}
+
+	public ExceptionNoticeStorage getExceptionNoticeStorage() {
+		return exceptionNoticeStorage;
+	}
+
+	public void setExceptionNoticeStorage(ExceptionNoticeStorage exceptionNoticeStorage) {
+		this.exceptionNoticeStorage = exceptionNoticeStorage;
 	}
 
 	/**
@@ -52,13 +63,6 @@ public class ExceptionHandler {
 	 */
 	public INoticeSendComponent getSendComponent() {
 		return sendComponent;
-	}
-
-	/**
-	 * @param sendComponent the sendComponent to set
-	 */
-	public void setSendComponent(INoticeSendComponent sendComponent) {
-		this.sendComponent = sendComponent;
 	}
 
 	/**
@@ -73,7 +77,8 @@ public class ExceptionHandler {
 		if (containsException(exception))
 			return null;
 		ExceptionNotice exceptionNotice = new ExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), null);
+				exceptionNoticeProperty.getIncludedTracePackage(), null,
+				exceptionNoticeProperty.getProjectEnviroment());
 		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
 		boolean noHas = persist(exceptionNotice);
 		if (noHas)
@@ -83,13 +88,24 @@ public class ExceptionHandler {
 	}
 
 	private boolean containsException(RuntimeException exception) {
-		Class<? extends RuntimeException> thisEClass = exception.getClass();
+		List<Class<? extends Throwable>> thisEClass = getAllExceptionClazz(exception);
 		List<Class<? extends RuntimeException>> list = exceptionNoticeProperty.getExcludeExceptions();
 		for (Class<? extends RuntimeException> clazz : list) {
-			if (clazz.isAssignableFrom(thisEClass))
+			if (thisEClass.stream().anyMatch(c -> clazz.isAssignableFrom(c)))
 				return true;
 		}
 		return false;
+	}
+
+	private List<Class<? extends Throwable>> getAllExceptionClazz(RuntimeException exception) {
+		List<Class<? extends Throwable>> list = new LinkedList<Class<? extends Throwable>>();
+		list.add(exception.getClass());
+		Throwable cause = exception.getCause();
+		while (cause != null) {
+			list.add(cause.getClass());
+			cause = cause.getCause();
+		}
+		return list;
 	}
 
 	/**
@@ -105,7 +121,7 @@ public class ExceptionHandler {
 		if (containsException(ex))
 			return null;
 		ExceptionNotice exceptionNotice = new ExceptionNotice(ex, exceptionNoticeProperty.getIncludedTracePackage(),
-				args);
+				args, exceptionNoticeProperty.getProjectEnviroment());
 		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
 		boolean noHas = persist(exceptionNotice);
 		if (noHas)
@@ -130,7 +146,8 @@ public class ExceptionHandler {
 		if (containsException(exception))
 			return null;
 		HttpExceptionNotice exceptionNotice = new HttpExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), url, param, requesBody, headers);
+				exceptionNoticeProperty.getIncludedTracePackage(), url, param, requesBody, headers,
+				exceptionNoticeProperty.getProjectEnviroment());
 		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
 		boolean noHas = persist(exceptionNotice);
 		if (noHas)
@@ -162,8 +179,7 @@ public class ExceptionHandler {
 				needNotice = true;
 			}
 		}
-		if (exceptionRedisStorageComponent != null)
-			exceptionRedisStorageComponent.save(exceptionNotice);
+		exceptionNoticeStorage.saveExcepion(exceptionNotice);
 		return needNotice;
 	}
 
