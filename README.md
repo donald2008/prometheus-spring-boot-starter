@@ -85,6 +85,7 @@ public class NoticeComponents {
 		throw new IllegalArgumentException(name + ":" + age);
 	}
 }
+
 ```
 6. 以上都建立好了以后，就可以写单元测试了:
 ```
