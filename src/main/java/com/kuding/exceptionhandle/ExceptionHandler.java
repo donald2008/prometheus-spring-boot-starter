@@ -18,11 +18,12 @@ import com.kuding.message.INoticeSendComponent;
 import com.kuding.pojos.ExceptionStatistics;
 import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
 import com.kuding.properties.ExceptionNoticeProperty;
-import com.kuding.redis.ExceptionRedisStorageComponent;
+import com.kuding.storage.ExceptionNoticeStorage;
 
 public class ExceptionHandler {
 
-	private ExceptionRedisStorageComponent exceptionRedisStorageComponent;
+	private ExceptionNoticeStorage exceptionNoticeStorage = x -> {
+	};
 
 	private final ExceptionNoticeProperty exceptionNoticeProperty;
 
@@ -49,16 +50,12 @@ public class ExceptionHandler {
 		return exceptionNoticeFrequencyStrategy;
 	}
 
-	public ExceptionRedisStorageComponent getExceptionRedisStorageComponent() {
-		return exceptionRedisStorageComponent;
+	public ExceptionNoticeStorage getExceptionNoticeStorage() {
+		return exceptionNoticeStorage;
 	}
 
-	/**
-	 * @param exceptionRedisStorageComponent the exceptionRedisStorageComponent to
-	 *                                       set
-	 */
-	public void setExceptionRedisStorageComponent(ExceptionRedisStorageComponent exceptionRedisStorageComponent) {
-		this.exceptionRedisStorageComponent = exceptionRedisStorageComponent;
+	public void setExceptionNoticeStorage(ExceptionNoticeStorage exceptionNoticeStorage) {
+		this.exceptionNoticeStorage = exceptionNoticeStorage;
 	}
 
 	/**
@@ -182,8 +179,7 @@ public class ExceptionHandler {
 				needNotice = true;
 			}
 		}
-		if (exceptionRedisStorageComponent != null)
-			exceptionRedisStorageComponent.save(exceptionNotice);
+		exceptionNoticeStorage.saveExcepion(exceptionNotice);
 		return needNotice;
 	}
 

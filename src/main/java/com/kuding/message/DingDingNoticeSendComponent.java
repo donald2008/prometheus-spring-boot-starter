@@ -23,7 +23,7 @@ import com.kuding.pojos.dingding.DingDingNotice;
 import com.kuding.pojos.dingding.DingDingResult;
 import com.kuding.properties.DingDingExceptionNoticeProperty;
 import com.kuding.properties.enums.DingdingTextType;
-import com.kuding.text.ExceptionNoticeResolver;
+import com.kuding.text.ExceptionNoticeTextResolver;
 
 public class DingDingNoticeSendComponent implements INoticeSendComponent {
 
@@ -31,13 +31,13 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 
 	private final DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty;
 
-	private final ExceptionNoticeResolver exceptionNoticeResolver;
+	private final ExceptionNoticeTextResolver exceptionNoticeResolver;
 
 	private final Log logger = LogFactory.getLog(getClass());
 
 	public DingDingNoticeSendComponent(DingdingHttpClient httpClient,
 			DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty,
-			ExceptionNoticeResolver exceptionNoticeResolver) {
+			ExceptionNoticeTextResolver exceptionNoticeResolver) {
 		this.httpClient = httpClient;
 		this.dingDingExceptionNoticeProperty = dingDingExceptionNoticeProperty;
 		this.exceptionNoticeResolver = exceptionNoticeResolver;

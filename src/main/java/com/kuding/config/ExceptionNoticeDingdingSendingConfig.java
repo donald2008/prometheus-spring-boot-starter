@@ -18,7 +18,7 @@ import com.kuding.message.DingDingNoticeSendComponent;
 import com.kuding.message.INoticeSendComponent;
 import com.kuding.properties.DingDingExceptionNoticeProperty;
 import com.kuding.properties.enums.DingdingTextType;
-import com.kuding.text.ExceptionNoticeResolver;
+import com.kuding.text.ExceptionNoticeTextResolver;
 
 @Configuration
 @ConditionalOnProperty(name = "exceptionnotice.open-notice", havingValue = "true", matchIfMissing = true)
@@ -34,7 +34,7 @@ public class ExceptionNoticeDingdingSendingConfig {
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "dingding", matchIfMissing = true)
 	public INoticeSendComponent addSendComponent(DingdingHttpClient dingdingHttpClient,
-			ExceptionNoticeResolver exceptionNoticeResolver) {
+			ExceptionNoticeTextResolver exceptionNoticeResolver) {
 		logger.debug("注册钉钉通知");
 		INoticeSendComponent component = new DingDingNoticeSendComponent(dingdingHttpClient, exceptionNoticeProperty,
 				exceptionNoticeResolver);
@@ -44,7 +44,7 @@ public class ExceptionNoticeDingdingSendingConfig {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "dingding", matchIfMissing = true)
-	public ExceptionNoticeResolver exceptionNoticeResolver() {
+	public ExceptionNoticeTextResolver ExceptionNoticeTextResolver() {
 		if (exceptionNoticeProperty.getDingdingTextType() == DingdingTextType.MARKDOWN)
 			return new DefaultMarkdownMessageResolver();
 		return x -> x.createText();

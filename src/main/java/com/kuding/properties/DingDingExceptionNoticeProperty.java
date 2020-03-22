@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.kuding.properties.enums.DingdingTextType;
 
-@ConfigurationProperties(prefix = "exceptionnotice.dinding")
+@ConfigurationProperties(prefix = "exceptionnotice.dingding")
 public class DingDingExceptionNoticeProperty {
 
 	/**

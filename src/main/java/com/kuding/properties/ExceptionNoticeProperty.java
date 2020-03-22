@@ -49,16 +49,6 @@ public class ExceptionNoticeProperty {
 	private ListenType listenType = ListenType.COMMON;
 
 	/**
-	 * 开启redis存储
-	 */
-	private boolean enableRedisStorage;
-
-	/**
-	 * redis的键
-	 */
-	private String redisKey = "prometheus-notice";
-
-	/**
 	 * 排除的需要统计的异常
 	 */
 	private List<Class<? extends RuntimeException>> excludeExceptions = new LinkedList<>();
@@ -140,34 +130,6 @@ public class ExceptionNoticeProperty {
 	 */
 	public void setListenType(ListenType listenType) {
 		this.listenType = listenType;
-	}
-
-	/**
-	 * @return the enableRedisStorage
-	 */
-	public boolean isEnableRedisStorage() {
-		return enableRedisStorage;
-	}
-
-	/**
-	 * @param enableRedisStorage the enableRedisStorage to set
-	 */
-	public void setEnableRedisStorage(boolean enableRedisStorage) {
-		this.enableRedisStorage = enableRedisStorage;
-	}
-
-	/**
-	 * @return the redisKey
-	 */
-	public String getRedisKey() {
-		return redisKey;
-	}
-
-	/**
-	 * @param redisKey the redisKey to set
-	 */
-	public void setRedisKey(String redisKey) {
-		this.redisKey = redisKey;
 	}
 
 	/**

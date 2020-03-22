@@ -15,7 +15,7 @@ import org.springframework.mail.MailSender;
 import com.kuding.message.EmailNoticeSendComponent;
 import com.kuding.message.INoticeSendComponent;
 import com.kuding.properties.EmailExceptionNoticeProperty;
-import com.kuding.text.ExceptionNoticeResolver;
+import com.kuding.text.ExceptionNoticeTextResolver;
 
 @Configuration
 @AutoConfigureAfter({ MailSenderAutoConfiguration.class })
@@ -34,7 +34,7 @@ public class ExceptionNoticeEmailSendingConfig {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "email")
-	public INoticeSendComponent emailNoticeSendComponent(ExceptionNoticeResolver exceptionNoticeResolver) {
+	public INoticeSendComponent emailNoticeSendComponent(ExceptionNoticeTextResolver exceptionNoticeResolver) {
 		INoticeSendComponent component = new EmailNoticeSendComponent(mailSender, mailProperties,
 				emailExceptionNoticeProperty, exceptionNoticeResolver);
 		return component;
@@ -43,7 +43,7 @@ public class ExceptionNoticeEmailSendingConfig {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "email")
-	public ExceptionNoticeResolver exceptionNoticeResolver() {
+	public ExceptionNoticeTextResolver ExceptionNoticeTextResolver() {
 		return x -> x.createText();
 	}
 }

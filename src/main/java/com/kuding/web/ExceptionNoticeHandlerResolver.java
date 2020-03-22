@@ -15,7 +15,7 @@ import com.kuding.anno.ExceptionListener;
 import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
 import com.kuding.properties.ExceptionNoticeProperty;
 
-public class ExceptionNoticeResolver implements HandlerExceptionResolver {
+public class ExceptionNoticeHandlerResolver implements HandlerExceptionResolver {
 
 	private final ExceptionNoticeHandlerDecoration exceptionHandler;
 
@@ -25,7 +25,7 @@ public class ExceptionNoticeResolver implements HandlerExceptionResolver {
 
 	private final CurrentRequestHeaderResolver currentRequestHeaderResolver;
 
-	public ExceptionNoticeResolver(ExceptionNoticeHandlerDecoration exceptionHandler,
+	public ExceptionNoticeHandlerResolver(ExceptionNoticeHandlerDecoration exceptionHandler,
 			CurrentRequetBodyResolver currentRequetBodyResolver,
 			CurrentRequestHeaderResolver currentRequestHeaderResolver,
 			ExceptionNoticeProperty exceptionNoticeProperty) {

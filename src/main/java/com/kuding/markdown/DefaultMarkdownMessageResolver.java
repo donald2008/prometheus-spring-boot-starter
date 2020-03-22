@@ -9,9 +9,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.kuding.content.ExceptionNotice;
 import com.kuding.content.HttpExceptionNotice;
-import com.kuding.text.ExceptionNoticeResolver;
+import com.kuding.text.ExceptionNoticeTextResolver;
 
-public class DefaultMarkdownMessageResolver implements ExceptionNoticeResolver {
+public class DefaultMarkdownMessageResolver implements ExceptionNoticeTextResolver {
 
 	private final Log logger = LogFactory.getLog(getClass());
 

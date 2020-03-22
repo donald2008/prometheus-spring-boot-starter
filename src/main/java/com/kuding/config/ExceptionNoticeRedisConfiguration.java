@@ -10,28 +10,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.google.gson.Gson;
 import com.kuding.exceptionhandle.ExceptionHandler;
-import com.kuding.properties.ExceptionNoticeProperty;
-import com.kuding.redis.ExceptionRedisStorageComponent;
+import com.kuding.properties.ExceptionNoticeStorageProperties;
+import com.kuding.storage.ExceptionNoticeStorage;
+import com.kuding.storage.redis.ExceptionNoticeRedisStorage;
 
 @Configuration
 @ConditionalOnClass({ StringRedisTemplate.class })
-@ConditionalOnProperty(name = "exceptionnotice.enable-redis-storage", havingValue = "true")
-@ConditionalOnMissingBean(value = { ExceptionRedisStorageComponent.class })
+@ConditionalOnProperty(name = "exceptionnotice.store.enable-redis-storage", havingValue = "true")
+@ConditionalOnMissingBean(value = { ExceptionNoticeStorage.class })
 @ConditionalOnBean({ ExceptionHandler.class })
 @AutoConfigureAfter({ ExceptionNoticeConfig.class })
 public class ExceptionNoticeRedisConfiguration {
 
 	@Autowired
-	private ExceptionNoticeProperty exceptionNoticeProperty;
+	private ExceptionNoticeStorageProperties exceptionNoticeStorageProperties;
 
 	@Bean
-	public ExceptionRedisStorageComponent exceptionRedisStorageComponent(StringRedisTemplate stringRedisTemplate,
-			Gson gson, ExceptionHandler exceptionHandler) {
-		ExceptionRedisStorageComponent exceptionRedisStorageComponent = new ExceptionRedisStorageComponent(
-				exceptionNoticeProperty, stringRedisTemplate, gson);
-		exceptionHandler.setExceptionRedisStorageComponent(exceptionRedisStorageComponent);
+	public ExceptionNoticeStorage exceptionRedisStorageComponent(StringRedisTemplate stringRedisTemplate) {
+		ExceptionNoticeStorage exceptionRedisStorageComponent = new ExceptionNoticeRedisStorage(stringRedisTemplate,
+				exceptionNoticeStorageProperties);
 		return exceptionRedisStorageComponent;
 	}
 

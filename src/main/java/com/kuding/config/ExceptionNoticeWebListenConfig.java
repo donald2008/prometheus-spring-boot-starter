@@ -25,7 +25,7 @@ import com.kuding.web.CurrentRequestHeaderResolver;
 import com.kuding.web.CurrentRequetBodyResolver;
 import com.kuding.web.DefaultRequestBodyResolver;
 import com.kuding.web.DefaultRequestHeaderResolver;
-import com.kuding.web.ExceptionNoticeResolver;
+import com.kuding.web.ExceptionNoticeHandlerResolver;
 
 @Configuration
 @AutoConfigureAfter({ ExceptionNoticeDecorationConfig.class })
@@ -41,12 +41,12 @@ public class ExceptionNoticeWebListenConfig implements WebMvcConfigurer, WebMvcR
 
 	@Override
 	public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
-		resolvers.add(0, exceptionNoticeResolver());
+		resolvers.add(0, ExceptionNoticeHandlerResolver());
 	}
 
 	@Bean
-	public ExceptionNoticeResolver exceptionNoticeResolver() {
-		ExceptionNoticeResolver exceptionNoticeResolver = new ExceptionNoticeResolver(exceptionHandler,
+	public ExceptionNoticeHandlerResolver ExceptionNoticeHandlerResolver() {
+		ExceptionNoticeHandlerResolver exceptionNoticeResolver = new ExceptionNoticeHandlerResolver(exceptionHandler,
 				currentRequetBodyResolver(), currentRequestHeaderResolver(), exceptionNoticeProperty);
 		return exceptionNoticeResolver;
 	}

@@ -45,6 +45,6 @@ public class DefaultRequestBodyResolver extends RequestBodyAdviceAdapter impleme
 
 	public void remove() {
 		currentRequestBodyInfo.remove();
-	} 
+	}
 
 }

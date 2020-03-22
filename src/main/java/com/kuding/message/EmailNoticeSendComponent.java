@@ -8,7 +8,7 @@ import org.springframework.mail.SimpleMailMessage;
 
 import com.kuding.content.ExceptionNotice;
 import com.kuding.properties.EmailExceptionNoticeProperty;
-import com.kuding.text.ExceptionNoticeResolver;
+import com.kuding.text.ExceptionNoticeTextResolver;
 
 public class EmailNoticeSendComponent implements INoticeSendComponent {
 
@@ -16,7 +16,7 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 
 	private final MailSender mailSender;
 
-	private final ExceptionNoticeResolver exceptionNoticeResolver;
+	private final ExceptionNoticeTextResolver exceptionNoticeResolver;
 
 	private final MailProperties mailProperties;
 
@@ -24,7 +24,7 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 
 	public EmailNoticeSendComponent(MailSender mailSender, MailProperties mailProperties,
 			EmailExceptionNoticeProperty emailExceptionNoticeProperty,
-			ExceptionNoticeResolver exceptionNoticeResolver) {
+			ExceptionNoticeTextResolver exceptionNoticeResolver) {
 		this.mailSender = mailSender;
 		this.mailProperties = mailProperties;
 		this.emailExceptionNoticeProperty = emailExceptionNoticeProperty;
