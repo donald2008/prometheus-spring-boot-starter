@@ -66,7 +66,7 @@ public class ExceptionNoticeProperty {
 	private List<Class<? extends RuntimeException>> excludeExceptions = new LinkedList<>();
 
 	/**
-	 * 当listenType为WEB_MVC时，处理请求异常通知时需要的header名称信息
+	 * 当listenType为web-mvc时，处理请求异常通知时需要的header名称信息
 	 */
 	private List<String> includeHeaderName = new ArrayList<String>();
 
