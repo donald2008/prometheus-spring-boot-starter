@@ -488,4 +488,6 @@ public class MyExceptionTextResolverConfig implements ExceptionNoticeResolverCon
 
 #### 2、0.5.1-team这个版本默认需要依赖spring-boot-starter-web，所以在工程中配置此框架必须要引入spring-boot-starter-web，我这块还没处理好，所以对于非web项目目前请自行改造
 
+[![Fork me on Gitee](https://gitee.com/ITEater/prometheus-spring-boot-starter/widgets/widget_2.svg)](https://gitee.com/ITEater/prometheus-spring-boot-starter)
+
 TODO 还没写完
