@@ -1,7 +1,5 @@
 package com.kuding.properties;
 
-import java.util.Arrays;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.kuding.properties.enums.DingdingTextType;
@@ -16,8 +14,16 @@ public class DingDingExceptionNoticeProperty {
 
 	/**
 	 * 钉钉机器人web钩子
+	 * 
+	 * @deprecated 已废弃，用accessToken替代，不再是整个网址
 	 */
+	@Deprecated
 	private String webHook;
+
+	/**
+	 * 钉钉机器人的accessToken
+	 */
+	private String accessToken;
 
 	/**
 	 * 是否开启验签
@@ -48,19 +54,20 @@ public class DingDingExceptionNoticeProperty {
 		this.phoneNum = phoneNum;
 	}
 
-	/**
-	 * @return the webHook
-	 */
+//
+//	/**
+//	 * @return the webHook
+//	 */
 	public String getWebHook() {
 		return webHook;
 	}
 
-	/**
-	 * @param webHook the webHook to set
-	 */
-	public void setWebHook(String webHook) {
-		this.webHook = webHook;
-	}
+//	/**
+//	 * @param webHook the webHook to set
+//	 */
+//	public void setWebHook(String webHook) {
+//		this.webHook = webHook;
+//	}
 
 	public boolean isEnableSignatureCheck() {
 		return enableSignatureCheck;
@@ -86,11 +93,11 @@ public class DingDingExceptionNoticeProperty {
 		this.dingdingTextType = dingdingTextType;
 	}
 
-	@Override
-	public String toString() {
-		return "DingDingExceptionNoticeProperty [phoneNum=" + Arrays.toString(phoneNum) + ", webHook=" + webHook
-				+ ", enableSignatureCheck=" + enableSignatureCheck + ", signSecret=" + signSecret
-				+ ", dingdingTextType=" + dingdingTextType + "]";
+	public String getAccessToken() {
+		return accessToken;
 	}
 
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
 }

@@ -24,7 +24,6 @@ public class HttpExceptionNotice extends ExceptionNotice {
 		this.paramInfo = param;
 		this.requestBody = requestBody;
 		this.headers = headers;
-
 	}
 
 	/**

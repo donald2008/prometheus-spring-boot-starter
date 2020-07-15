@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 
+import com.google.gson.Gson;
 import com.kuding.httpclient.DefaultDingdingHttpClient;
 import com.kuding.httpclient.DingdingHttpClient;
 import com.kuding.markdown.DefaultMarkdownMessageResolver;
@@ -53,9 +52,8 @@ public class ExceptionNoticeDingdingSendingConfig {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(value = "exceptionnotice.notice-type", havingValue = "dingding", matchIfMissing = true)
-	public DingdingHttpClient dingdingHttpClient(RestTemplateBuilder restTemplateBuilder) {
-		RestTemplate restTemplate = restTemplateBuilder.build();
-		DefaultDingdingHttpClient defaultDingdingHttpClient = new DefaultDingdingHttpClient(restTemplate);
+	public DingdingHttpClient dingdingHttpClient(Gson gson) {
+		DefaultDingdingHttpClient defaultDingdingHttpClient = new DefaultDingdingHttpClient(gson);
 		return defaultDingdingHttpClient;
 	}
 

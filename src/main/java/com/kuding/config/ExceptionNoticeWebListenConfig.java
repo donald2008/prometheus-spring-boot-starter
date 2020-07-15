@@ -4,18 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
@@ -28,10 +25,8 @@ import com.kuding.web.DefaultRequestHeaderResolver;
 import com.kuding.web.ExceptionNoticeHandlerResolver;
 
 @Configuration
-@AutoConfigureAfter({ ExceptionNoticeDecorationConfig.class })
-@ConditionalOnClass({ WebMvcConfigurer.class, RequestBodyAdvice.class, RequestMappingHandlerAdapter.class })
-@ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "web-mvc")
-@ConditionalOnBean({ ExceptionNoticeHandlerDecoration.class })
+@ConditionalOnWebApplication
+@ConditionalOnProperty(name = "exceptionnotice.listen-type", havingValue = "web")
 public class ExceptionNoticeWebListenConfig implements WebMvcConfigurer, WebMvcRegistrations {
 
 	@Autowired

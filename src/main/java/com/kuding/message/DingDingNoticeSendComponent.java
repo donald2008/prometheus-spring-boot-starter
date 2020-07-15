@@ -1,10 +1,10 @@
 package com.kuding.message;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,9 +12,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.kuding.content.ExceptionNotice;
 import com.kuding.httpclient.DingdingHttpClient;
@@ -33,7 +30,7 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 
 	private final ExceptionNoticeTextResolver exceptionNoticeResolver;
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private final Log logger = LogFactory.getLog(DingDingNoticeSendComponent.class);
 
 	public DingDingNoticeSendComponent(DingdingHttpClient httpClient,
 			DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty,
@@ -59,25 +56,18 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 							? new DingDingNotice(notice, new DingDingAt(dingDingExceptionNoticeProperty.getPhoneNum()))
 							: new DingDingNotice("异常通知", notice,
 									new DingDingAt(dingDingExceptionNoticeProperty.getPhoneNum()));
-			DingDingResult result = httpClient.post(generateUrl(dingDingExceptionNoticeProperty), dingDingNotice,
-					DingDingResult.class);
+			Map<String, Object> map = new HashMap<String, Object>();
+			if (dingDingExceptionNoticeProperty.isEnableSignatureCheck()) {
+				long timestamp = System.currentTimeMillis();
+				map.put("sign",
+						generateSign(System.currentTimeMillis(), dingDingExceptionNoticeProperty.getSignSecret()));
+				map.put("timestamp", timestamp);
+			}
+			DingDingResult result = httpClient.post(dingDingExceptionNoticeProperty.getAccessToken(), dingDingNotice,
+					map);
 			logger.debug(result);
 		} else
 			logger.error("无法进行钉钉通知，不存在背锅侠");
-	}
-
-	protected URI generateUrl(DingDingExceptionNoticeProperty dingDingExceptionNoticeProperty) {
-		boolean enableSign = dingDingExceptionNoticeProperty.isEnableSignatureCheck();
-		String signSec = dingDingExceptionNoticeProperty.getSignSecret();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(dingDingExceptionNoticeProperty.getWebHook());
-		if (enableSign && !StringUtils.isEmpty(signSec)) {
-			Long timestamp = System.currentTimeMillis();
-			String sign = generateSign(timestamp, signSec);
-			Assert.notNull(sign, "calculate sign goes error!");
-			builder.queryParam("timestamp", timestamp).queryParam("sign", sign);
-		}
-		URI uri = builder.build(true).toUri();
-		return uri;
 	}
 
 	protected String generateSign(Long timestamp, String sec) {
@@ -86,7 +76,7 @@ public class DingDingNoticeSendComponent implements INoticeSendComponent {
 			Mac mac = Mac.getInstance("HmacSHA256");
 			mac.init(new SecretKeySpec(sec.getBytes("UTF-8"), "HmacSHA256"));
 			byte[] signData = mac.doFinal(combine.getBytes("UTF-8"));
-			return URLEncoder.encode(Base64.encodeBase64String(signData), "UTF-8");
+			return Base64.encodeBase64String(signData);
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException | InvalidKeyException e) {
 			e.printStackTrace();
 		}
