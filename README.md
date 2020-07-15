@@ -1,5 +1,10 @@
 # 一个异常通知的spring-boot-start框架 prometheus-spring-boot-starter
 
+
+#### 更新预告
+
+ 个人版准备一次更新，版本升级到personal-0.6版，此次更新与旧版不兼容，同时新增微服务的异常监控
+
 #### 前言的前言：
 
 
