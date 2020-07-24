@@ -2,9 +2,9 @@ package com.kuding.microservice.interfaces;
 
 import java.util.List;
 
-import com.kuding.microservice.pojo.MicroServiceNotice;
-import com.kuding.microservice.pojo.ServiceHealthProblem;
-import com.kuding.microservice.pojo.ServiceInstanceLackProblem;
+import com.kuding.pojos.servicemonitor.MicroServiceReport;
+import com.kuding.pojos.servicemonitor.ServiceHealthProblem;
+import com.kuding.pojos.servicemonitor.ServiceInstanceLackProblem;
 
 public interface ServiceCheckNoticeRepository {
 
@@ -14,6 +14,9 @@ public interface ServiceCheckNoticeRepository {
 
 	void add(List<String> lackServices, List<String> additionalServices);
 
-	MicroServiceNotice generateMicroServiceNotice();
+	MicroServiceReport generateMicroServiceNotice();
 
+	int totalServiceCount();
+
+	void clear();
 }

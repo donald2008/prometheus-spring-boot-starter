@@ -1,5 +1,7 @@
 package com.kuding.microservice.task;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,10 +11,12 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationEventPublisher;
 
-import com.kuding.microservice.events.ServiceProblemEvent;
+import com.kuding.microservice.events.InstanceCountEvent;
+import com.kuding.microservice.events.InstanceHealthEvent;
 import com.kuding.microservice.interfaces.HealthCheckHandler;
-import com.kuding.microservice.pojo.ServiceProblemType;
-import com.kuding.microservice.properties.ServiceCheck;
+import com.kuding.pojos.servicemonitor.ServiceHealth;
+import com.kuding.pojos.servicemonitor.ServiceStatus;
+import com.kuding.properties.servicemonitor.ServiceCheck;
 
 public class ServiceCheckTask implements Runnable {
 
@@ -62,23 +66,21 @@ public class ServiceCheckTask implements Runnable {
 	@Override
 	public void run() {
 		freshInstance();
-		List<ServiceInstance> list = new ArrayList<ServiceInstance>(servicesMap.size());
+		List<ServiceHealth> list = new ArrayList<ServiceHealth>(servicesMap.size());
 		servicesMap.forEach((x, y) -> {
-			if (!healthCheckHandler.isHealthy(y, serviceCheck))
-				list.add(y);
+			list.add(new ServiceHealth(y.getInstanceId(),
+					healthCheckHandler.isHealthy(y, serviceCheck) ? ServiceStatus.UP : ServiceStatus.DOWN));
 		});
-		if (list.size() > 0) {
-			applicationEventPublisher.publishEvent(
-					new ServiceProblemEvent(this, serviceId, list, 0, ServiceProblemType.INSTANCE_NOT_HEALTHY));
-		}
+		applicationEventPublisher.publishEvent(new InstanceHealthEvent(this, serviceId, list));
 		checked = true;
 	}
 
 	public void freshInstance() {
 		List<ServiceInstance> list = discoveryClient.getInstances(serviceId);
-		if (list.size() < serviceCheck.getServiceCount())
-			applicationEventPublisher.publishEvent(new ServiceProblemEvent(this, serviceId, list,
-					serviceCheck.getServiceCount() - list.size(), ServiceProblemType.INSTANCE_LACK));
+		list.forEach(x -> System.out.println(x));
+		applicationEventPublisher
+				.publishEvent(new InstanceCountEvent(this, serviceId, serviceCheck.getServiceCount() - list.size(),
+						list.stream().map(ServiceInstance::getInstanceId).collect(toSet())));
 		servicesMap.clear();
 		list.forEach(x -> servicesMap.put(x.getInstanceId(), x));
 	}

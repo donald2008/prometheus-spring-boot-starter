@@ -2,17 +2,20 @@ package com.kuding.microservice.task;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationEventPublisher;
 
-import com.kuding.microservice.events.ServiceNotExistEvent;
+import com.kuding.microservice.events.ServiceExistEvent;
 
 public class ServiceExistCheckTask implements Runnable {
 
-	private final List<String> allService;
+	private final Set<String> allService = new TreeSet<String>();
 
 	private final DiscoveryClient discoveryClient;
 
@@ -20,9 +23,9 @@ public class ServiceExistCheckTask implements Runnable {
 
 	private boolean authDetected = false;
 
-	public ServiceExistCheckTask(List<String> allService, DiscoveryClient discoveryClient,
+	public ServiceExistCheckTask(Collection<String> allService, DiscoveryClient discoveryClient,
 			ApplicationEventPublisher applicationEventPublisher, boolean authDetected) {
-		this.allService = allService;
+		this.allService.addAll(allService);
 		this.discoveryClient = discoveryClient;
 		this.applicationEventPublisher = applicationEventPublisher;
 		this.authDetected = authDetected;
@@ -32,8 +35,12 @@ public class ServiceExistCheckTask implements Runnable {
 		return authDetected;
 	}
 
-	public List<String> getAllService() {
+	public Set<String> getAllService() {
 		return allService;
+	}
+
+	public void setAuthDetected(boolean authDetected) {
+		this.authDetected = authDetected;
 	}
 
 	public DiscoveryClient getDiscoveryClient() {
@@ -47,11 +54,12 @@ public class ServiceExistCheckTask implements Runnable {
 	@Override
 	public void run() {
 		List<String> existedServices = discoveryClient.getServices();
+		existedServices.forEach(x -> System.out.println(x));
 		List<String> lackServices = allService.stream().filter(x -> !existedServices.contains(x)).collect(toList());
 		List<String> additionalServices = Collections.emptyList();
 		if (authDetected)
 			additionalServices = existedServices.stream().filter(x -> !lackServices.contains(x)).collect(toList());
-		if (lackServices.size() > 0 || additionalServices.size() > 0)
-			applicationEventPublisher.publishEvent(new ServiceNotExistEvent(this, lackServices, additionalServices));
+		applicationEventPublisher
+				.publishEvent(new ServiceExistEvent(this, lackServices, additionalServices, existedServices.size()));
 	}
 }

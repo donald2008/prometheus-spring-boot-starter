@@ -2,7 +2,7 @@ package com.kuding.microservice.interfaces;
 
 import org.springframework.cloud.client.ServiceInstance;
 
-import com.kuding.microservice.properties.ServiceCheck;
+import com.kuding.properties.servicemonitor.ServiceCheck;
 
 @FunctionalInterface
 public interface HealthCheckHandler {

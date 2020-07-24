@@ -1,12 +1,12 @@
 package com.kuding.microservice.control;
 
-import java.util.HashMap;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import static java.util.stream.Collectors.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,16 +14,16 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.kuding.microservice.interfaces.HealthCheckHandler;
-import com.kuding.microservice.properties.ServiceCheck;
-import com.kuding.microservice.properties.ServiceMonitorProperties;
 import com.kuding.microservice.task.ServiceCheckTask;
+import com.kuding.properties.servicemonitor.ServiceCheck;
+import com.kuding.properties.servicemonitor.ServiceMonitorProperties;
 
 public class ServiceCheckControl implements SmartInitializingSingleton, DisposableBean {
 
-	private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+	private final TaskScheduler taskScheduler;
 
 	private final ServiceMonitorProperties serviceMonitorProperties;
 
@@ -41,10 +41,10 @@ public class ServiceCheckControl implements SmartInitializingSingleton, Disposab
 
 	private ServiceCheck defaultServiceCheck;
 
-	public ServiceCheckControl(ThreadPoolTaskScheduler threadPoolTaskScheduler,
-			ServiceMonitorProperties serviceMonitorProperties, DiscoveryClient discoveryClient,
-			ApplicationEventPublisher applicationEventPublisher, HealthCheckHandler healthCheckHandler) {
-		this.threadPoolTaskScheduler = threadPoolTaskScheduler;
+	public ServiceCheckControl(TaskScheduler taskScheduler, ServiceMonitorProperties serviceMonitorProperties,
+			DiscoveryClient discoveryClient, ApplicationEventPublisher applicationEventPublisher,
+			HealthCheckHandler healthCheckHandler) {
+		this.taskScheduler = taskScheduler;
 		this.serviceMonitorProperties = serviceMonitorProperties;
 		this.discoveryClient = discoveryClient;
 		this.applicationEventPublisher = applicationEventPublisher;
@@ -60,8 +60,7 @@ public class ServiceCheckControl implements SmartInitializingSingleton, Disposab
 
 	@Override
 	public void afterSingletonsInstantiated() {
-		Map<String, ServiceCheck> map = new HashMap<String, ServiceCheck>(
-				serviceMonitorProperties.getMonitorServices());
+		Map<String, ServiceCheck> map = serviceMonitorProperties.getMonitorServices();
 		defaultServiceCheck = map.remove("default");
 		if (serviceMonitorProperties.isAutoDiscovery()) {
 			List<String> services = discoveryClient.getServices();
@@ -78,14 +77,14 @@ public class ServiceCheckControl implements SmartInitializingSingleton, Disposab
 	public void add(String service, ServiceCheck serviceCheck) {
 		ServiceCheckTask existed = servicesMap.get(service);
 		if (existed != null) {
-			logger.warn("service check Existed:" + existed);
+			logger.debug("service check Existed:" + existed);
 			return;
 		}
 		ServiceCheckTask serviceCheckTask = new ServiceCheckTask(service,
-				serviceCheck == null ? serviceMonitorProperties.getMonitorServices().get("default") : serviceCheck,
-				discoveryClient, healthCheckHandler, applicationEventPublisher);
+				serviceCheck == null ? defaultServiceCheck : serviceCheck, discoveryClient, healthCheckHandler,
+				applicationEventPublisher);
 		servicesMap.put(service, serviceCheckTask);
-		ScheduledFuture<?> scheduledFuture = threadPoolTaskScheduler.scheduleAtFixedRate(serviceCheckTask,
+		ScheduledFuture<?> scheduledFuture = taskScheduler.scheduleAtFixedRate(serviceCheckTask,
 				serviceCheck.getCheckInterval());
 		taskResultMap.put(service, scheduledFuture);
 	}
@@ -102,16 +101,54 @@ public class ServiceCheckControl implements SmartInitializingSingleton, Disposab
 		this.taskResultMap = taskResultMap;
 	}
 
-	public ThreadPoolTaskScheduler getThreadPoolTaskScheduler() {
-		return threadPoolTaskScheduler;
-	}
-
 	public ServiceMonitorProperties getServiceMonitorProperties() {
 		return serviceMonitorProperties;
 	}
 
 	public Map<String, ServiceCheckTask> getServicesMap() {
 		return servicesMap;
+	}
+
+	/**
+	 * @return the defaultServiceCheck
+	 */
+	public ServiceCheck getDefaultServiceCheck() {
+		return defaultServiceCheck;
+	}
+
+	/**
+	 * @param defaultServiceCheck the defaultServiceCheck to set
+	 */
+	public void setDefaultServiceCheck(ServiceCheck defaultServiceCheck) {
+		this.defaultServiceCheck = defaultServiceCheck;
+	}
+
+	/**
+	 * @return the taskScheduler
+	 */
+	public TaskScheduler getTaskScheduler() {
+		return taskScheduler;
+	}
+
+	/**
+	 * @return the discoveryClient
+	 */
+	public DiscoveryClient getDiscoveryClient() {
+		return discoveryClient;
+	}
+
+	/**
+	 * @return the applicationEventPublisher
+	 */
+	public ApplicationEventPublisher getApplicationEventPublisher() {
+		return applicationEventPublisher;
+	}
+
+	/**
+	 * @return the healthCheckHandler
+	 */
+	public HealthCheckHandler getHealthCheckHandler() {
+		return healthCheckHandler;
 	}
 
 }

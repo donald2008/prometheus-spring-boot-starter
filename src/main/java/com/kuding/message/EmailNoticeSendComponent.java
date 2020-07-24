@@ -6,25 +6,24 @@ import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
-import com.kuding.content.ExceptionNotice;
-import com.kuding.properties.EmailExceptionNoticeProperty;
-import com.kuding.text.ExceptionNoticeTextResolver;
+import com.kuding.pojos.PromethuesNotice;
+import com.kuding.properties.EmailNoticeProperty;
+import com.kuding.text.NoticeTextResolver;
 
-public class EmailNoticeSendComponent implements INoticeSendComponent {
+public class EmailNoticeSendComponent<T extends PromethuesNotice> implements INoticeSendComponent<T> {
 
 //	private final Log logger = LogFactory.getLog(getClass());
 
 	private final MailSender mailSender;
 
-	private final ExceptionNoticeTextResolver exceptionNoticeResolver;
+	private final NoticeTextResolver<T> exceptionNoticeResolver;
 
 	private final MailProperties mailProperties;
 
-	private final EmailExceptionNoticeProperty emailExceptionNoticeProperty;
+	private final EmailNoticeProperty emailExceptionNoticeProperty;
 
 	public EmailNoticeSendComponent(MailSender mailSender, MailProperties mailProperties,
-			EmailExceptionNoticeProperty emailExceptionNoticeProperty,
-			ExceptionNoticeTextResolver exceptionNoticeResolver) {
+			EmailNoticeProperty emailExceptionNoticeProperty, NoticeTextResolver<T> exceptionNoticeResolver) {
 		this.mailSender = mailSender;
 		this.mailProperties = mailProperties;
 		this.emailExceptionNoticeProperty = emailExceptionNoticeProperty;
@@ -33,7 +32,7 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 	}
 
 	@Override
-	public void send(ExceptionNotice exceptionNotice) {
+	public void send(T notice) {
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		String fromEmail = mailProperties.getUsername();
 		mailMessage.setFrom(fromEmail);
@@ -44,8 +43,9 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 		String[] bcc = emailExceptionNoticeProperty.getBcc();
 		if (bcc != null && bcc.length > 0)
 			mailMessage.setBcc(bcc);
-		mailMessage.setText(exceptionNoticeResolver.resolve(exceptionNotice));
-		mailMessage.setSubject(String.format("来自%s的异常提醒", exceptionNotice.getProject()));
+		mailMessage.setText(exceptionNoticeResolver.resolve(notice));
+		mailMessage.setSubject(String.format("一个来自%s的提醒（%s）", notice.getTitle(),
+				notice.getProjectEnviroment().getName()));
 		mailSender.send(mailMessage);
 	}
 
@@ -55,7 +55,7 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 		return false;
 	}
 
-	private void checkAllEmails(EmailExceptionNoticeProperty emailExceptionNoticeProperty) {
+	private void checkAllEmails(EmailNoticeProperty emailExceptionNoticeProperty) {
 		String fromEmail = mailProperties.getUsername();
 		if (fromEmail != null && !isEmail(fromEmail))
 			throw new IllegalArgumentException("发件人邮箱错误");
@@ -99,7 +99,7 @@ public class EmailNoticeSendComponent implements INoticeSendComponent {
 	/**
 	 * @return the emailExceptionNoticeProperty
 	 */
-	public EmailExceptionNoticeProperty getEmailExceptionNoticeProperty() {
+	public EmailNoticeProperty getEmailExceptionNoticeProperty() {
 		return emailExceptionNoticeProperty;
 	}
 

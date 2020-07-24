@@ -7,33 +7,32 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.connector.RequestFacade;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.kuding.anno.ExceptionListener;
-import com.kuding.exceptionhandle.interfaces.ExceptionNoticeHandlerDecoration;
-import com.kuding.properties.ExceptionNoticeProperty;
+import com.kuding.exceptionhandle.ExceptionHandler;
+import com.kuding.properties.exception.ExceptionNoticeProperties;
 
 public class ExceptionNoticeHandlerResolver implements HandlerExceptionResolver {
 
-	private final ExceptionNoticeHandlerDecoration exceptionHandler;
+	private final ExceptionHandler exceptionHandler;
 
-	private final ExceptionNoticeProperty exceptionNoticeProperty;
+	private final ExceptionNoticeProperties exceptionNoticeProperties;
 
 	private final CurrentRequetBodyResolver currentRequetBodyResolver;
 
 	private final CurrentRequestHeaderResolver currentRequestHeaderResolver;
 
-	public ExceptionNoticeHandlerResolver(ExceptionNoticeHandlerDecoration exceptionHandler,
+	public ExceptionNoticeHandlerResolver(ExceptionHandler exceptionHandler,
 			CurrentRequetBodyResolver currentRequetBodyResolver,
 			CurrentRequestHeaderResolver currentRequestHeaderResolver,
-			ExceptionNoticeProperty exceptionNoticeProperty) {
+			ExceptionNoticeProperties exceptionNoticeProperties) {
 		this.exceptionHandler = exceptionHandler;
 		this.currentRequestHeaderResolver = currentRequestHeaderResolver;
 		this.currentRequetBodyResolver = currentRequetBodyResolver;
-		this.exceptionNoticeProperty = exceptionNoticeProperty;
+		this.exceptionNoticeProperties = exceptionNoticeProperties;
 	}
 
 	@Override
@@ -64,7 +63,7 @@ public class ExceptionNoticeHandlerResolver implements HandlerExceptionResolver 
 	}
 
 	private Map<String, String> getHeader(HttpServletRequest request) {
-		return currentRequestHeaderResolver.headers(request, exceptionNoticeProperty.getIncludeHeaderName());
+		return currentRequestHeaderResolver.headers(request, exceptionNoticeProperties.getIncludeHeaderName());
 	}
 
 	private ExceptionListener getListener(HandlerMethod handlerMethod) {

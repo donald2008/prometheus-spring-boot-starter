@@ -1,68 +1,41 @@
 package com.kuding.exceptionhandle;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.ApplicationEventPublisher;
 
-import com.kuding.content.ExceptionNotice;
-import com.kuding.content.HttpExceptionNotice;
-import com.kuding.message.INoticeSendComponent;
-import com.kuding.pojos.ExceptionStatistics;
-import com.kuding.properties.ExceptionNoticeFrequencyStrategy;
-import com.kuding.properties.ExceptionNoticeProperty;
-import com.kuding.storage.ExceptionNoticeStorage;
+import com.kuding.exceptionhandle.event.ExceptionNoticeEvent;
+import com.kuding.pojos.ExceptionNotice;
+import com.kuding.pojos.HttpExceptionNotice;
+import com.kuding.properties.PromethreusNoticeProperties;
+import com.kuding.properties.exception.ExceptionNoticeProperties;
 
 public class ExceptionHandler {
 
-	private ExceptionNoticeStorage exceptionNoticeStorage = x -> {
-	};
+	private final PromethreusNoticeProperties noticeProperties;
 
-	private final ExceptionNoticeProperty exceptionNoticeProperty;
+	private final ExceptionNoticeProperties exceptionNoticeProperties;
 
-	private final ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy;
-
-	private final INoticeSendComponent sendComponent;
-
-	private final Map<String, ExceptionStatistics> checkUid = Collections.synchronizedMap(new HashMap<>());
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	public ExceptionHandler(ExceptionNoticeProperty exceptionNoticeProperty,
-			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy, INoticeSendComponent sendComponent) {
-		this.exceptionNoticeProperty = exceptionNoticeProperty;
-		this.exceptionNoticeFrequencyStrategy = exceptionNoticeFrequencyStrategy;
-		this.sendComponent = sendComponent;
-	}
-
-	public ExceptionNoticeProperty getExceptionNoticeProperty() {
-		return exceptionNoticeProperty;
-	}
-
-	public ExceptionNoticeFrequencyStrategy getExceptionNoticeFrequencyStrategy() {
-		return exceptionNoticeFrequencyStrategy;
-	}
-
-	public ExceptionNoticeStorage getExceptionNoticeStorage() {
-		return exceptionNoticeStorage;
-	}
-
-	public void setExceptionNoticeStorage(ExceptionNoticeStorage exceptionNoticeStorage) {
-		this.exceptionNoticeStorage = exceptionNoticeStorage;
-	}
-
 	/**
-	 * @return the sendComponent
+	 * @param exceptionNoticeStorage
+	 * @param noticeProperties
+	 * @param exceptionNoticeProperties
+	 * @param applicationEventPublisher
 	 */
-	public INoticeSendComponent getSendComponent() {
-		return sendComponent;
+	public ExceptionHandler(PromethreusNoticeProperties noticeProperties,
+			ExceptionNoticeProperties exceptionNoticeProperties, ApplicationEventPublisher applicationEventPublisher) {
+		super();
+		this.noticeProperties = noticeProperties;
+		this.exceptionNoticeProperties = exceptionNoticeProperties;
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	/**
@@ -77,19 +50,17 @@ public class ExceptionHandler {
 		if (containsException(exception))
 			return null;
 		ExceptionNotice exceptionNotice = new ExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), null,
-				exceptionNoticeProperty.getProjectEnviroment());
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			sendComponent.send(exceptionNotice);
+				exceptionNoticeProperties.getIncludedTracePackage(), null, noticeProperties.getProjectEnviroment(),
+				String.format("%s的异常通知", noticeProperties.getProjectName()));
+		exceptionNotice.setProject(noticeProperties.getProjectName());
+		applicationEventPublisher.publishEvent(new ExceptionNoticeEvent(this, exceptionNotice));
 		return exceptionNotice;
 
 	}
 
 	private boolean containsException(RuntimeException exception) {
 		List<Class<? extends Throwable>> thisEClass = getAllExceptionClazz(exception);
-		List<Class<? extends RuntimeException>> list = exceptionNoticeProperty.getExcludeExceptions();
+		List<Class<? extends RuntimeException>> list = exceptionNoticeProperties.getExcludeExceptions();
 		for (Class<? extends RuntimeException> clazz : list) {
 			if (thisEClass.stream().anyMatch(c -> clazz.isAssignableFrom(c)))
 				return true;
@@ -120,12 +91,12 @@ public class ExceptionHandler {
 	public ExceptionNotice createNotice(RuntimeException ex, String method, Object[] args) {
 		if (containsException(ex))
 			return null;
-		ExceptionNotice exceptionNotice = new ExceptionNotice(ex, exceptionNoticeProperty.getIncludedTracePackage(),
-				args, exceptionNoticeProperty.getProjectEnviroment());
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			sendComponent.send(exceptionNotice);
+		ExceptionNotice exceptionNotice = new ExceptionNotice(ex, exceptionNoticeProperties.getIncludedTracePackage(),
+				args, noticeProperties.getProjectEnviroment(),
+				String.format("%s的异常通知", noticeProperties.getProjectName()));
+		logger.debug("创建异常通知：" + method);
+		exceptionNotice.setProject(noticeProperties.getProjectName());
+		applicationEventPublisher.publishEvent(new ExceptionNoticeEvent(this, exceptionNotice));
 		return exceptionNotice;
 
 	}
@@ -145,59 +116,13 @@ public class ExceptionHandler {
 			String requesBody, Map<String, String> headers) {
 		if (containsException(exception))
 			return null;
+		logger.debug("创建异常通知：" + url);
 		HttpExceptionNotice exceptionNotice = new HttpExceptionNotice(exception,
-				exceptionNoticeProperty.getIncludedTracePackage(), url, param, requesBody, headers,
-				exceptionNoticeProperty.getProjectEnviroment());
-		exceptionNotice.setProject(exceptionNoticeProperty.getProjectName());
-		boolean noHas = persist(exceptionNotice);
-		if (noHas)
-			sendComponent.send(exceptionNotice);
+				exceptionNoticeProperties.getIncludedTracePackage(), url, param, requesBody, headers,
+				noticeProperties.getProjectEnviroment(), String.format("%s的异常通知", noticeProperties.getProjectName()));
+		exceptionNotice.setProject(noticeProperties.getProjectName());
+		applicationEventPublisher.publishEvent(new ExceptionNoticeEvent(this, exceptionNotice));
 		return exceptionNotice;
 	}
 
-	private boolean persist(ExceptionNotice exceptionNotice) {
-		Boolean needNotice = false;
-		String uid = exceptionNotice.getUid();
-		ExceptionStatistics exceptionStatistics = checkUid.get(uid);
-		logger.debug(exceptionStatistics);
-		if (exceptionStatistics != null) {
-			Long count = exceptionStatistics.plusOne();
-			if (exceptionNoticeFrequencyStrategy.getEnabled()) {
-				if (stratergyCheck(exceptionStatistics, exceptionNoticeFrequencyStrategy)) {
-					LocalDateTime now = LocalDateTime.now();
-					exceptionNotice.setLatestShowTime(now);
-					exceptionNotice.setShowCount(count);
-					exceptionStatistics.setLastShowedCount(count);
-					exceptionStatistics.setNoticeTime(now);
-					needNotice = true;
-				}
-			}
-		} else {
-			exceptionStatistics = new ExceptionStatistics(uid);
-			synchronized (exceptionStatistics) {
-				checkUid.put(uid, exceptionStatistics);
-				needNotice = true;
-			}
-		}
-		exceptionNoticeStorage.saveExcepion(exceptionNotice);
-		return needNotice;
-	}
-
-	private boolean stratergyCheck(ExceptionStatistics exceptionStatistics,
-			ExceptionNoticeFrequencyStrategy exceptionNoticeFrequencyStrategy) {
-		switch (exceptionNoticeFrequencyStrategy.getFrequencyType()) {
-		case TIMEOUT:
-			Duration dur = Duration.between(exceptionStatistics.getNoticeTime(), LocalDateTime.now());
-			return exceptionNoticeFrequencyStrategy.getNoticeTimeInterval().compareTo(dur) < 0;
-		case SHOWCOUNT:
-			return exceptionStatistics.getShowCount().longValue() - exceptionStatistics.getLastShowedCount()
-					.longValue() > exceptionNoticeFrequencyStrategy.getNoticeShowCount().longValue();
-		}
-		return false;
-	}
-
-	@Scheduled(cron = "0 25 0 * * * ")
-	public void resetCheck() {
-		checkUid.clear();
-	}
 }
