@@ -161,6 +161,8 @@ exceptionnotice:
 |redis-key|string|(**开启redis限定**)redis存储的键值|否|
 |exclude-exceptions|list|排除异常，表示这些异常不需要进行异常通知|否|
 
+- ``project-enviroment``主要用于区分线上异常通知的环境问题，对于日常开发到测试部署到正式部署，配置信息不管通过传统的工程内properties控制还是通过微服务配置中心统一配置，都需要区别工程环境的问题，所以为了方便对比，加入了此配置项
+
 - 以上通知中**最重要**的当属``exceptionnotice.listen-type``,此配置表示工程的监听方式，目前有两种监听方式：**普通监听（common）** ；**mvc监听（web-mvc）** 。这两种监听方式各有千秋，普通监听方式主要运用aop的方式对有注解的方法或类进行监听，可以加在任何类与方法上。**mvc监听只能对controller层进行监听，对其它层无效**，不过异常通知的信息更丰富，不仅仅包括了普通监听的所有信息（不包含参数），还包含了请求中的路径信息（path）、参数信息（param）、请求中的请求体信息（body）和请求体中的头信息（header）。例如：
 ```
 @RestController
@@ -185,9 +187,11 @@ public class DemoController {
 	...more code
 ```
 具体效果如下：
+
 ![请求异常通知](/src/main/resources/mvcnormal.png)
 
 - 实际上钉钉机器人提供了很多其他的消息类型，这里适配了**钉钉的markdown**文本输出，只需要配置``exceptionnotice.dingding-text-type=markdown``即可，最终你可以得到以下面类似的效果：
+
 ![请求异常通知markdown](/src/main/resources/mvcmarkdown.png)
 
 - 项目中的异常一般分类两大类：第一类为未捕获异常，第二类为业务异常。业务异常一般由用户自己定义的异常，在javaweb项目中，假如用户的请求不满足返回结果的条件，一般是需要主动抛出自定义异常的，所以这类异常并不需要进行通知。排除不需要异常通知的配置如下：
