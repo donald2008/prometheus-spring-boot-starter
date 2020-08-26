@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -25,6 +27,8 @@ public class ExceptionNoticeResolver implements HandlerExceptionResolver {
 
 	private final CurrentRequestHeaderResolver currentRequestHeaderResolver;
 
+	private final Log logger = LogFactory.getLog(ExceptionNoticeResolver.class);
+
 	public ExceptionNoticeResolver(ExceptionNoticeHandlerDecoration exceptionHandler,
 			CurrentRequetBodyResolver currentRequetBodyResolver,
 			CurrentRequestHeaderResolver currentRequestHeaderResolver,
@@ -38,13 +42,15 @@ public class ExceptionNoticeResolver implements HandlerExceptionResolver {
 	@Override
 	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler,
 			Exception ex) {
+		logger.error("出现异常：", ex);
 		RuntimeException e = null;
 		if (ex instanceof RuntimeException)
 			e = (RuntimeException) ex;
 		HandlerMethod handlerMethod = null;
+		logger.debug("handler:" + handler);
 		if (handler instanceof HandlerMethod)
 			handlerMethod = (HandlerMethod) handler;
-		ExceptionListener listener = getListener(handlerMethod);
+		ExceptionListener listener = handlerMethod == null ? null : getListener(handlerMethod);
 		if (listener != null && e != null && handler != null) {
 			exceptionHandler.createHttpNotice(listener.value(), e, request.getRequestURI(), getParames(request),
 					getRequestBody(), getHeader(request));
